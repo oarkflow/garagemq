@@ -7,7 +7,7 @@ import (
 	"math/rand"
 	"time"
 
-	amqp "github.com/rabbitmq/amqp091-go"
+	amqp "github.com/valinurovam/garagemq/amqp091"
 
 	"github.com/valinurovam/garagemq/examples/utils"
 )
@@ -26,21 +26,20 @@ func randInt(min int, max int) int {
 
 func publishMessages(messages int) {
 	for i := 0; i < messages; i++ {
-		user := utils.User{}
-		user.FirstName = randomString(randInt(3, 10))
-		user.LastName = randomString(randInt(3, 10))
+		user := utils.User{
+			FirstName: randomString(randInt(3, 10)),
+			LastName:  randomString(randInt(3, 10)),
+		}
 
-		payload, err := json.Marshal(user)
-		utils.FailOnError(err, "Failed to marshal JSON")
-
-		err = utils.Ch.PublishWithContext(context.Background(), "go-test-exchange", "go-test-key", false, false,
+		payload, _ := json.Marshal(user)
+		err := utils.Ch.PublishWithContext(context.Background(), utils.Exchange, utils.PublishKey, false, false,
 			amqp.Publishing{
 				DeliveryMode: amqp.Persistent,
 				ContentType:  "application/json",
 				Body:         payload,
 				Timestamp:    time.Now(),
-			})
-
+			},
+		)
 		utils.FailOnError(err, "Failed to Publish on RabbitMQ")
 	}
 }
@@ -48,10 +47,7 @@ func publishMessages(messages int) {
 func main() {
 	utils.Init()
 	log.Println("Starting publisher...")
-
-	publishMessages(10000)
-
+	publishMessages(10)
 	defer utils.Ch.Close()
-
 	defer utils.Conn.Close()
 }

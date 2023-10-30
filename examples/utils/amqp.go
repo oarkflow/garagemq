@@ -5,8 +5,15 @@ import (
 	"fmt"
 	"log"
 
-	amqp "github.com/rabbitmq/amqp091-go"
+	amqp "github.com/valinurovam/garagemq/amqp091"
 )
+
+var Conn *amqp.Connection
+var Ch *amqp.Channel
+var PublishKey = "kern.critical"
+var ConsumerKey = "kern.*"
+var Exchange = "test_exchange"
+var ConsumerName = "go-amqp-example"
 
 type User struct {
 	FirstName string `json:"first_name"`
@@ -28,9 +35,6 @@ func Init() {
 	initAmqp()
 }
 
-var Conn *amqp.Connection
-var Ch *amqp.Channel
-
 func initAmqp() {
 	var err error
 	Conn, err = amqp.Dial(*amqpURI)
@@ -39,13 +43,5 @@ func initAmqp() {
 	log.Printf("got Connection, getting Channel...")
 	Ch, err = Conn.Channel()
 	FailOnError(err, "Failed to open a channel")
-
-	log.Printf("got Channel, declaring Exchange (%s)", "go-test-exchange")
-
-	err = Ch.ExchangeDeclare("go-test-exchange", amqp.ExchangeDirect, true, false, false, false, nil)
-
-	FailOnError(err, "Failed to declare the Exchange")
-
-	log.Printf("declared Exchange, declaring Queue (%s)", "go-test-queue")
 
 }

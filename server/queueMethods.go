@@ -5,6 +5,7 @@ import (
 	"github.com/valinurovam/garagemq/binding"
 	"github.com/valinurovam/garagemq/exchange"
 	"github.com/valinurovam/garagemq/queue"
+	"github.com/valinurovam/garagemq/utils/xid"
 )
 
 func (channel *Channel) queueRoute(method amqp.Method) *amqp.Error {
@@ -29,12 +30,7 @@ func (channel *Channel) queueDeclare(method *amqp.QueueDeclare) *amqp.Error {
 	var notFoundErr, exclusiveErr *amqp.Error
 
 	if method.Queue == "" {
-		return amqp.NewChannelError(
-			amqp.CommandInvalid,
-			"queue name is required",
-			method.ClassIdentifier(),
-			method.MethodIdentifier(),
-		)
+		method.Queue = xid.New().String()
 	}
 
 	existingQueue, notFoundErr = channel.getQueueWithError(method.Queue, method)

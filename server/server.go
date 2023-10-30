@@ -11,6 +11,7 @@ import (
 	"syscall"
 
 	log "github.com/sirupsen/logrus"
+
 	"github.com/valinurovam/garagemq/amqp"
 	"github.com/valinurovam/garagemq/auth"
 	"github.com/valinurovam/garagemq/config"
