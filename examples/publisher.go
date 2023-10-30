@@ -47,7 +47,8 @@ func publishMessages(messages int) {
 func main() {
 	utils.Init()
 	log.Println("Starting publisher...")
-	publishMessages(10)
+	publishMessages(100000)
+	time.Sleep(10 * time.Minute)
 	defer utils.Ch.Close()
 	defer utils.Conn.Close()
 }

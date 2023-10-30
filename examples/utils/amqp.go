@@ -13,6 +13,7 @@ var Ch *amqp.Channel
 var PublishKey = "kern.critical"
 var ConsumerKey = "kern.*"
 var Exchange = "test_exchange"
+var Exchange2 = "test_exchange2"
 var ConsumerName = "go-amqp-example"
 
 type User struct {
