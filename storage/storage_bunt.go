@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/oarkflow/garagemq/config"
+	"github.com/oarkflow/garagemq/interfaces"
 	"github.com/tidwall/buntdb"
-	"github.com/valinurovam/garagemq/config"
-	"github.com/valinurovam/garagemq/interfaces"
 )
 
 // BuntDB implements wrapper for BuntDB database

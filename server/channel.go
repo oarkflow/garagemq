@@ -8,14 +8,14 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/oarkflow/garagemq/amqp"
+	"github.com/oarkflow/garagemq/consumer"
+	"github.com/oarkflow/garagemq/exchange"
+	"github.com/oarkflow/garagemq/metrics"
+	"github.com/oarkflow/garagemq/pool"
+	"github.com/oarkflow/garagemq/qos"
+	"github.com/oarkflow/garagemq/queue"
 	log "github.com/sirupsen/logrus"
-	"github.com/valinurovam/garagemq/amqp"
-	"github.com/valinurovam/garagemq/consumer"
-	"github.com/valinurovam/garagemq/exchange"
-	"github.com/valinurovam/garagemq/metrics"
-	"github.com/valinurovam/garagemq/pool"
-	"github.com/valinurovam/garagemq/qos"
-	"github.com/valinurovam/garagemq/queue"
 )
 
 const (

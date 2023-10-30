@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/valinurovam/garagemq/amqp"
+	"github.com/oarkflow/garagemq/amqp"
 )
 
 // MatchType is the x-match attribute in a binding argument table

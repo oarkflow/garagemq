@@ -12,10 +12,10 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/oarkflow/garagemq/amqp"
+	"github.com/oarkflow/garagemq/metrics"
+	"github.com/oarkflow/garagemq/qos"
 	log "github.com/sirupsen/logrus"
-	"github.com/valinurovam/garagemq/amqp"
-	"github.com/valinurovam/garagemq/metrics"
-	"github.com/valinurovam/garagemq/qos"
 )
 
 // connection status list

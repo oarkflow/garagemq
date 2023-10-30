@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/valinurovam/garagemq/amqp"
+	"github.com/oarkflow/garagemq/amqp"
 )
 
 func (channel *Channel) confirmRoute(method amqp.Method) *amqp.Error {

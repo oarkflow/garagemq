@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"sort"
 
-	"github.com/valinurovam/garagemq/metrics"
-	"github.com/valinurovam/garagemq/server"
+	"github.com/oarkflow/garagemq/metrics"
+	"github.com/oarkflow/garagemq/server"
 )
 
 type ChannelsHandler struct {

@@ -1,11 +1,11 @@
 package server
 
 import (
-	"github.com/valinurovam/garagemq/amqp"
-	"github.com/valinurovam/garagemq/binding"
-	"github.com/valinurovam/garagemq/exchange"
-	"github.com/valinurovam/garagemq/queue"
-	"github.com/valinurovam/garagemq/utils/xid"
+	"github.com/oarkflow/garagemq/amqp"
+	"github.com/oarkflow/garagemq/binding"
+	"github.com/oarkflow/garagemq/exchange"
+	"github.com/oarkflow/garagemq/queue"
+	"github.com/oarkflow/garagemq/utils/xid"
 )
 
 func (channel *Channel) queueRoute(method amqp.Method) *amqp.Error {

@@ -7,9 +7,9 @@ import (
 	"math/rand"
 	"time"
 
-	amqp "github.com/valinurovam/garagemq/amqp091"
+	amqp "github.com/oarkflow/garagemq/amqp091"
 
-	"github.com/valinurovam/garagemq/examples/utils"
+	"github.com/oarkflow/garagemq/examples/utils"
 )
 
 func randomString(l int) string {

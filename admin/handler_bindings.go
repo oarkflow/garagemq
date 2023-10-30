@@ -3,7 +3,7 @@ package admin
 import (
 	"net/http"
 
-	"github.com/valinurovam/garagemq/server"
+	"github.com/oarkflow/garagemq/server"
 )
 
 type BindingsHandler struct {

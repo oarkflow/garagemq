@@ -4,8 +4,8 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/valinurovam/garagemq/amqp"
-	"github.com/valinurovam/garagemq/auth"
+	"github.com/oarkflow/garagemq/amqp"
+	"github.com/oarkflow/garagemq/auth"
 )
 
 func (channel *Channel) connectionRoute(method amqp.Method) *amqp.Error {

@@ -2,9 +2,10 @@ package server
 
 import (
 	"fmt"
-	"github.com/valinurovam/garagemq/amqp"
-	"github.com/valinurovam/garagemq/exchange"
 	"strings"
+
+	"github.com/oarkflow/garagemq/amqp"
+	"github.com/oarkflow/garagemq/exchange"
 )
 
 func (channel *Channel) exchangeRoute(method amqp.Method) *amqp.Error {

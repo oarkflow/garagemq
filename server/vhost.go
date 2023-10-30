@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/oarkflow/garagemq/amqp"
+	"github.com/oarkflow/garagemq/binding"
+	"github.com/oarkflow/garagemq/config"
+	"github.com/oarkflow/garagemq/exchange"
+	"github.com/oarkflow/garagemq/metrics"
+	"github.com/oarkflow/garagemq/msgstorage"
+	"github.com/oarkflow/garagemq/queue"
+	"github.com/oarkflow/garagemq/srvstorage"
 	log "github.com/sirupsen/logrus"
-	"github.com/valinurovam/garagemq/amqp"
-	"github.com/valinurovam/garagemq/binding"
-	"github.com/valinurovam/garagemq/config"
-	"github.com/valinurovam/garagemq/exchange"
-	"github.com/valinurovam/garagemq/metrics"
-	"github.com/valinurovam/garagemq/msgstorage"
-	"github.com/valinurovam/garagemq/queue"
-	"github.com/valinurovam/garagemq/srvstorage"
 )
 
 const exDefaultName = ""

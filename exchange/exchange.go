@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/valinurovam/garagemq/amqp"
-	"github.com/valinurovam/garagemq/binding"
-	"github.com/valinurovam/garagemq/metrics"
+	"github.com/oarkflow/garagemq/amqp"
+	"github.com/oarkflow/garagemq/binding"
+	"github.com/oarkflow/garagemq/metrics"
 )
 
 // available exchange types

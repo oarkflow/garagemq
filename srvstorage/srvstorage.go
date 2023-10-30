@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/valinurovam/garagemq/binding"
-	"github.com/valinurovam/garagemq/exchange"
-	"github.com/valinurovam/garagemq/interfaces"
-	"github.com/valinurovam/garagemq/queue"
+	"github.com/oarkflow/garagemq/binding"
+	"github.com/oarkflow/garagemq/exchange"
+	"github.com/oarkflow/garagemq/interfaces"
+	"github.com/oarkflow/garagemq/queue"
 )
 
 const queuePrefix = "vhost.queue"

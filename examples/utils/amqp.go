@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	amqp "github.com/valinurovam/garagemq/amqp091"
+	amqp "github.com/oarkflow/garagemq/amqp091"
 )
 
 var Conn *amqp.Connection

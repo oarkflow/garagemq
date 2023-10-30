@@ -12,14 +12,14 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/valinurovam/garagemq/amqp"
-	"github.com/valinurovam/garagemq/auth"
-	"github.com/valinurovam/garagemq/config"
-	"github.com/valinurovam/garagemq/interfaces"
-	"github.com/valinurovam/garagemq/metrics"
-	"github.com/valinurovam/garagemq/msgstorage"
-	"github.com/valinurovam/garagemq/srvstorage"
-	"github.com/valinurovam/garagemq/storage"
+	"github.com/oarkflow/garagemq/amqp"
+	"github.com/oarkflow/garagemq/auth"
+	"github.com/oarkflow/garagemq/config"
+	"github.com/oarkflow/garagemq/interfaces"
+	"github.com/oarkflow/garagemq/metrics"
+	"github.com/oarkflow/garagemq/msgstorage"
+	"github.com/oarkflow/garagemq/srvstorage"
+	"github.com/oarkflow/garagemq/storage"
 )
 
 type ServerState int

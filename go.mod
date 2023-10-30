@@ -1,4 +1,4 @@
-module github.com/valinurovam/garagemq
+module github.com/oarkflow/garagemq
 
 go 1.21
 
