@@ -12,10 +12,11 @@ import (
 	"sync/atomic"
 	"time"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/oarkflow/garagemq/amqp"
 	"github.com/oarkflow/garagemq/metrics"
 	"github.com/oarkflow/garagemq/qos"
-	log "github.com/sirupsen/logrus"
 )
 
 // connection status list
@@ -146,7 +147,7 @@ func (conn *Connection) close() {
 	sort.Sort(sort.Reverse(sort.IntSlice(channelIds)))
 	for _, chID := range channelIds {
 		channel := conn.channels[uint16(chID)]
-		channel.delete()
+		channel.Delete()
 		delete(conn.channels, uint16(chID))
 	}
 	conn.channelsLock.Unlock()
@@ -197,7 +198,7 @@ func (conn *Connection) safeClose(wg *sync.WaitGroup) {
 func (conn *Connection) clearQueues() {
 	virtualHost := conn.GetVirtualHost()
 	if virtualHost == nil {
-		// it is possible when conn close before open, for example login failure
+		// it is possible when conn Close before open, for example login failure
 		return
 	}
 	for _, queue := range virtualHost.GetQueues() {
@@ -220,7 +221,7 @@ func (conn *Connection) handleConnection() {
 
 	// @spec-note
 	// If the server cannot support the protocol specified in the protocol header,
-	// it MUST respond with a valid protocol header and then close the socket connection.
+	// it MUST respond with a valid protocol header and then Close the socket connection.
 	// The client MUST start a new connection by sending a protocol header
 	if !bytes.Equal(buf, amqp.AmqpHeader) {
 		conn.logger.WithFields(log.Fields{
@@ -330,7 +331,7 @@ func (conn *Connection) handleIncoming() {
 	for {
 		// TODO
 		// @spec-note
-		// After sending connection.close , any received methods except Close and Close­OK MUST be discarded.
+		// After sending connection.Close , any received methods except Close and Close­OK MUST be discarded.
 		// The response to receiving a Close after sending Close must be to send Close­Ok.
 		frame, err := amqp.ReadFrame(buffer)
 		if err != nil {

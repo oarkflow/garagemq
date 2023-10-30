@@ -8,6 +8,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/oarkflow/garagemq/amqp"
 	"github.com/oarkflow/garagemq/consumer"
 	"github.com/oarkflow/garagemq/exchange"
@@ -15,7 +17,6 @@ import (
 	"github.com/oarkflow/garagemq/pool"
 	"github.com/oarkflow/garagemq/qos"
 	"github.com/oarkflow/garagemq/queue"
-	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -82,7 +83,7 @@ func NewChannel(id uint16, conn *Connection) *Channel {
 		conn:   conn,
 		server: conn.server,
 		// for incoming channel much capacity is good for performance
-		// but it is difficult to implement processing already queued frames on shutdown or connection close
+		// but it is difficult to implement processing already queued frames on shutdown or connection Close
 		incoming:     make(chan *amqp.Frame, 128),
 		outgoing:     conn.outgoing,
 		status:       channelNew,
@@ -130,12 +131,12 @@ func (channel *Channel) handleIncoming() {
 
 	// TODO
 	// @spec-note
-	// After sending channel.close, any received methods except Close and Close­OK MUST be discarded.
+	// After sending channel.Close, any received methods except Close and Close­OK MUST be discarded.
 	// The response to receiving a Close after sending Close must be to send Close­Ok.
 	for {
 		select {
 		case <-channel.closeCh:
-			channel.close()
+			channel.Close()
 			return
 		case frame := <-channel.incoming:
 			if frame == nil {
@@ -425,7 +426,7 @@ func (channel *Channel) addConsumer(method *amqp.BasicConsume) (cmr *consumer.Co
 	return cmr, nil
 }
 
-func (channel *Channel) removeConsumer(cTag string) {
+func (channel *Channel) RemoveConsumer(cTag string) {
 	channel.cmrLock.Lock()
 	defer channel.cmrLock.Unlock()
 	if cmr, ok := channel.consumers[cTag]; ok {
@@ -434,7 +435,11 @@ func (channel *Channel) removeConsumer(cTag string) {
 	}
 }
 
-func (channel *Channel) close() {
+func (channel *Channel) Consumers() map[string]*consumer.Consumer {
+	return channel.consumers
+}
+
+func (channel *Channel) Close() {
 	channel.cmrLock.Lock()
 	for _, cmr := range channel.consumers {
 		cmr.Stop()
@@ -451,7 +456,7 @@ func (channel *Channel) close() {
 	channel.logger.Info("Channel closed")
 }
 
-func (channel *Channel) delete() {
+func (channel *Channel) Delete() {
 	channel.closeCh <- true
 	channel.status = channelDelete
 }
@@ -648,11 +653,11 @@ func (channel *Channel) checkQueueLockWithError(qu *queue.Queue, method amqp.Met
 	return nil
 }
 
-func (channel *Channel) isActive() bool {
+func (channel *Channel) IsActive() bool {
 	return channel.active
 }
 
-func (channel *Channel) changeFlow(active bool) {
+func (channel *Channel) ChangeFlow(active bool) {
 	if channel.active == active {
 		return
 	}

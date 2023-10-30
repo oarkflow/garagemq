@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sync"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/oarkflow/garagemq/amqp"
 	"github.com/oarkflow/garagemq/binding"
 	"github.com/oarkflow/garagemq/config"
@@ -13,7 +15,6 @@ import (
 	"github.com/oarkflow/garagemq/msgstorage"
 	"github.com/oarkflow/garagemq/queue"
 	"github.com/oarkflow/garagemq/srvstorage"
-	log "github.com/sirupsen/logrus"
 )
 
 const exDefaultName = ""
@@ -331,7 +332,7 @@ func (vhost *VirtualHost) loadBindings() {
 	}
 }
 
-// DeleteQueue delete queue from virtual host and all bindings to that queue
+// DeleteQueue Delete queue from virtual host and all bindings to that queue
 // Also queue will be removed from server storage
 func (vhost *VirtualHost) DeleteQueue(queueName string, ifUnused bool, ifEmpty bool) (uint64, error) {
 	vhost.quLock.Lock()

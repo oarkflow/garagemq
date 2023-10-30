@@ -11,13 +11,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
+
 	"github.com/oarkflow/garagemq/admin"
 	"github.com/oarkflow/garagemq/config"
 	"github.com/oarkflow/garagemq/metrics"
 	"github.com/oarkflow/garagemq/server"
-	"github.com/sirupsen/logrus"
-	"github.com/spf13/pflag"
-	"github.com/spf13/viper"
 )
 
 func init() {

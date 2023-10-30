@@ -35,7 +35,7 @@ func (channel *Channel) channelOpen(method *amqp.ChannelOpen) (err *amqp.Error) 
 func (channel *Channel) channelClose(method *amqp.ChannelClose) (err *amqp.Error) {
 	channel.status = channelClosed
 	channel.SendMethod(&amqp.ChannelCloseOk{})
-	channel.close()
+	channel.Close()
 	return nil
 }
 
@@ -45,7 +45,7 @@ func (channel *Channel) channelCloseOk(method *amqp.ChannelCloseOk) (err *amqp.E
 }
 
 func (channel *Channel) channelFlow(method *amqp.ChannelFlow) (err *amqp.Error) {
-	channel.changeFlow(method.Active)
+	channel.ChangeFlow(method.Active)
 	channel.SendMethod(&amqp.ChannelFlowOk{Active: method.Active})
 	return nil
 }
