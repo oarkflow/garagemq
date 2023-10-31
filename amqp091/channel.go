@@ -12,6 +12,7 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/oarkflow/garagemq/deadlock"
 	"github.com/oarkflow/garagemq/utils/xid"
 )
 
@@ -32,7 +33,7 @@ type Channel struct {
 	destructor sync.Once
 	m          sync.Mutex // struct field mutex
 	confirmM   sync.Mutex // publisher confirms state mutex
-	notifyM    sync.RWMutex
+	notifyM    deadlock.RWMutex
 
 	connection *Connection
 

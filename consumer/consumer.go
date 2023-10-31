@@ -2,11 +2,11 @@ package consumer
 
 import (
 	"fmt"
-	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/oarkflow/garagemq/amqp"
+	"github.com/oarkflow/garagemq/deadlock"
 	"github.com/oarkflow/garagemq/interfaces"
 	"github.com/oarkflow/garagemq/qos"
 	"github.com/oarkflow/garagemq/queue"
@@ -28,7 +28,7 @@ type Consumer struct {
 	noAck       bool
 	channel     interfaces.Channel
 	queue       *queue.Queue
-	statusLock  sync.RWMutex
+	statusLock  deadlock.RWMutex
 	status      int
 	qos         []*qos.AmqpQos
 	consume     chan struct{}

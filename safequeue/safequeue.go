@@ -1,9 +1,8 @@
 package safequeue
 
 import (
-	"sync"
-
 	"github.com/oarkflow/garagemq/amqp"
+	"github.com/oarkflow/garagemq/deadlock"
 )
 
 // We change item's type from {}interface to *amqp.Message, cause we know that we use safequeue only in AMQP context
@@ -12,7 +11,7 @@ import (
 // SafeQueue represents simple FIFO queue
 // TODO Is that implementation faster? test simple slice queue
 type SafeQueue struct {
-	sync.RWMutex
+	deadlock.RWMutex
 	shards    [][]*amqp.Message
 	shardSize int
 	tailIdx   int

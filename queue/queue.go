@@ -9,6 +9,7 @@ import (
 
 	"github.com/oarkflow/garagemq/amqp"
 	"github.com/oarkflow/garagemq/config"
+	"github.com/oarkflow/garagemq/deadlock"
 	"github.com/oarkflow/garagemq/interfaces"
 	"github.com/oarkflow/garagemq/metrics"
 	"github.com/oarkflow/garagemq/qos"
@@ -40,13 +41,13 @@ type Queue struct {
 	exclusive   bool
 	autoDelete  bool
 	durable     bool
-	cmrLock     sync.RWMutex
+	cmrLock     deadlock.RWMutex
 	consumers   []interfaces.Consumer
 	consumeExcl bool
 	call        chan struct{}
 	wasConsumed bool
 	shardSize   int
-	actLock     sync.RWMutex
+	actLock     deadlock.RWMutex
 	active      bool
 	// persistent storage
 	msgPStorage interfaces.MsgStorage

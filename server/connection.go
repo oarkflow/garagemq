@@ -15,6 +15,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/oarkflow/garagemq/amqp"
+	"github.com/oarkflow/garagemq/deadlock"
 	"github.com/oarkflow/garagemq/metrics"
 	"github.com/oarkflow/garagemq/qos"
 )
@@ -54,13 +55,13 @@ type Connection struct {
 	server           *Server
 	netConn          *net.TCPConn
 	logger           *log.Entry
-	channelsLock     sync.RWMutex
+	channelsLock     deadlock.RWMutex
 	channels         map[uint16]*Channel
 	outgoing         chan *amqp.Frame
 	clientProperties *amqp.Table
 	maxChannels      uint16
 	maxFrameSize     uint32
-	statusLock       sync.RWMutex
+	statusLock       deadlock.RWMutex
 	status           int
 	qos              *qos.AmqpQos
 	virtualHost      *VirtualHost
@@ -169,8 +170,7 @@ func (conn *Connection) getChannel(id uint16) *Channel {
 	return channel
 }
 
-func (conn *Connection) safeClose(wg *sync.WaitGroup) {
-	defer wg.Done()
+func (conn *Connection) safeClose() {
 
 	ch := conn.getChannel(0)
 	if ch == nil {
@@ -203,7 +203,15 @@ func (conn *Connection) clearQueues() {
 	}
 	for _, queue := range virtualHost.GetQueues() {
 		if queue.IsExclusive() && queue.ConnID() == conn.id {
-			virtualHost.DeleteQueue(queue.GetName(), false, false)
+			_, err := virtualHost.DeleteQueue(queue.GetName(), false, false)
+			if err != nil {
+				// todo: what should server do?
+				continue
+			}
+			conn.logger.WithFields(log.Fields{
+				"vhost": conn.vhostName,
+				"queue": queue.GetName(),
+			}).Info("Queue deleted by exclusive connection")
 		}
 	}
 }

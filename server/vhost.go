@@ -10,6 +10,7 @@ import (
 	"github.com/oarkflow/garagemq/amqp"
 	"github.com/oarkflow/garagemq/binding"
 	"github.com/oarkflow/garagemq/config"
+	"github.com/oarkflow/garagemq/deadlock"
 	"github.com/oarkflow/garagemq/exchange"
 	"github.com/oarkflow/garagemq/metrics"
 	"github.com/oarkflow/garagemq/msgstorage"
@@ -24,9 +25,9 @@ const exDefaultName = ""
 type VirtualHost struct {
 	name            string
 	system          bool
-	exLock          sync.RWMutex
+	exLock          deadlock.RWMutex
 	exchanges       map[string]*exchange.Exchange
-	quLock          sync.RWMutex
+	quLock          deadlock.RWMutex
 	queues          map[string]*queue.Queue
 	msgStorageP     *msgstorage.MsgStorage
 	msgStorageT     *msgstorage.MsgStorage
@@ -332,7 +333,7 @@ func (vhost *VirtualHost) loadBindings() {
 	}
 }
 
-// DeleteQueue Delete queue from virtual host and all bindings to that queue
+// DeleteQueue delete queue from virtual host and all bindings to that queue
 // Also queue will be removed from server storage
 func (vhost *VirtualHost) DeleteQueue(queueName string, ifUnused bool, ifEmpty bool) (uint64, error) {
 	vhost.quLock.Lock()
@@ -348,13 +349,21 @@ func (vhost *VirtualHost) DeleteQueue(queueName string, ifUnused bool, ifEmpty b
 		return 0, err
 	}
 
-	qu.Stop()
+	if err = qu.Stop(); err != nil {
+		vhost.logger.WithError(err).WithFields(log.Fields{
+			"queueName": qu.GetName(),
+		}).Error("unable to stop queue")
+	}
 
 	for _, ex := range vhost.exchanges {
 		removedBindings := ex.RemoveQueueBindings(queueName)
 		vhost.RemoveBindings(removedBindings)
 	}
-	vhost.srvStorage.DelQueue(vhost.name, qu)
+	if err := vhost.srvStorage.DelQueue(vhost.name, qu); err != nil {
+		vhost.logger.WithError(err).WithFields(log.Fields{
+			"queueName": qu.GetName(),
+		}).Error("unable to delete queue")
+	}
 	delete(vhost.queues, queueName)
 
 	return length, nil
@@ -369,7 +378,14 @@ func (vhost *VirtualHost) Stop() error {
 	defer vhost.exLock.Unlock()
 	vhost.logger.Info("Stop virtual host")
 	for _, qu := range vhost.queues {
-		qu.Stop()
+		err := qu.Stop()
+		if err != nil {
+			// todo what should server do?
+			vhost.logger.WithError(err).WithFields(log.Fields{
+				"queueName": qu.GetName(),
+			}).Info("unable to stop queue")
+			continue
+		}
 		vhost.logger.WithFields(log.Fields{
 			"queueName": qu.GetName(),
 		}).Info("Queue stopped")

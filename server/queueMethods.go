@@ -89,7 +89,14 @@ func (channel *Channel) queueDeclare(method *amqp.QueueDeclare) *amqp.Error {
 		return nil
 	}
 
-	newQueue.Start()
+	if err := newQueue.Start(); err != nil {
+		return amqp.NewChannelError(
+			amqp.InternalError,
+			err.Error(),
+			method.ClassIdentifier(),
+			method.MethodIdentifier(),
+		)
+	}
 	err := channel.conn.GetVirtualHost().AppendQueue(newQueue)
 	if err != nil {
 		return amqp.NewChannelError(
