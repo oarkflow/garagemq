@@ -1,6 +1,6 @@
 module github.com/oarkflow/garagemq
 
-go 1.21
+go 1.21.0
 
 require (
 	github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf

@@ -88,7 +88,9 @@ func (consumer *Consumer) retrieveAndSendMessage() {
 	if message == nil {
 		return
 	}
-
+	if consumer.noAck {
+		consumer.queue.AckMsg(message)
+	}
 	dTag := consumer.channel.NextDeliveryTag()
 	if !consumer.noAck {
 		consumer.channel.AddUnackedMessage(dTag, consumer.ConsumerTag, consumer.queue.GetName(), message)
