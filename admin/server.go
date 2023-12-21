@@ -7,11 +7,11 @@ import (
 	"github.com/oarkflow/garagemq/server"
 )
 
-type AdminServer struct {
+type Server struct {
 	s *http.Server
 }
 
-func NewAdminServer(amqpServer *server.Server, host string, port string) *AdminServer {
+func NewServer(amqpServer *server.Server, host string, port string) *Server {
 	http.Handle("/", http.FileServer(http.Dir("admin-frontend/build")))
 	http.Handle("/overview", NewOverviewHandler(amqpServer))
 	http.Handle("/exchanges", NewExchangesHandler(amqpServer))
@@ -20,7 +20,7 @@ func NewAdminServer(amqpServer *server.Server, host string, port string) *AdminS
 	http.Handle("/bindings", NewBindingsHandler(amqpServer))
 	http.Handle("/channels", NewChannelsHandler(amqpServer))
 
-	adminServer := &AdminServer{}
+	adminServer := &Server{}
 	adminServer.s = &http.Server{
 		Addr: fmt.Sprintf("%s:%s", host, port),
 	}
@@ -28,6 +28,6 @@ func NewAdminServer(amqpServer *server.Server, host string, port string) *AdminS
 	return adminServer
 }
 
-func (server *AdminServer) Start() error {
+func (server *Server) Start() error {
 	return server.s.ListenAndServe()
 }

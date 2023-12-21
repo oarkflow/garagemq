@@ -75,7 +75,7 @@ func main() {
 	metrics.NewTrackRegistry(15, time.Second, false)
 
 	srv := server.NewServer(cfg.TCP.IP, cfg.TCP.Port, cfg.Proto, cfg)
-	adminServer := admin.NewAdminServer(srv, cfg.Admin.IP, cfg.Admin.Port)
+	adminServer := admin.NewServer(srv, cfg.Admin.IP, cfg.Admin.Port)
 
 	// Start admin server
 	go func() {
