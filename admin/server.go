@@ -5,29 +5,42 @@ import (
 	"net/http"
 
 	"github.com/oarkflow/garagemq/server"
+
+	frameServer "github.com/oarkflow/frame/server"
 )
 
 type Server struct {
 	s *http.Server
+	f *frameServer.Frame
 }
 
 func NewServer(amqpServer *server.Server, host string, port string) *Server {
-	http.Handle("/", http.FileServer(http.Dir("admin-frontend/build")))
-	http.Handle("/overview", NewOverviewHandler(amqpServer))
-	http.Handle("/exchanges", NewExchangesHandler(amqpServer))
-	http.Handle("/queues", NewQueuesHandler(amqpServer))
-	http.Handle("/connections", NewConnectionsHandler(amqpServer))
-	http.Handle("/bindings", NewBindingsHandler(amqpServer))
-	http.Handle("/channels", NewChannelsHandler(amqpServer))
+	url := fmt.Sprintf("%s:%s", host, port)
+	srv := frameServer.Default(frameServer.WithHostPorts(url))
 
-	adminServer := &Server{}
-	adminServer.s = &http.Server{
-		Addr: fmt.Sprintf("%s:%s", host, port),
-	}
+	consumerHandler := NewConsumerHandler(amqpServer)
+	bindHandler := NewBindingsHandler(amqpServer)
+	overviewHandler := NewOverviewHandler(amqpServer)
+	exchangeHandler := NewExchangesHandler(amqpServer)
+	queuesHandler := NewQueuesHandler(amqpServer)
+	connectionHandler := NewConnectionsHandler(amqpServer)
+	channelsHandler := NewChannelsHandler(amqpServer)
 
+	srv.Static("/", "admin-frontend/build")
+	srv.GET("/overview", overviewHandler.Index)
+	srv.GET("/exchanges", exchangeHandler.Index)
+	srv.GET("/queues", queuesHandler.Index)
+	srv.GET("/connections", connectionHandler.Index)
+	srv.GET("/channels", channelsHandler.Index)
+	srv.GET("/consumers", consumerHandler.Index)
+	srv.POST("/consumer/start", consumerHandler.Resume)
+	srv.POST("/consumer/stop", consumerHandler.Pause)
+	srv.GET("/bindings", bindHandler.Index)
+	adminServer := &Server{f: srv}
 	return adminServer
 }
 
 func (server *Server) Start() error {
-	return server.s.ListenAndServe()
+	server.f.Spin()
+	return nil
 }

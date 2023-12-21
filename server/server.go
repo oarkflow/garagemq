@@ -402,7 +402,7 @@ func (srv *Server) onSignal(sig os.Signal) {
 // func (srv *Server) testOnSignal(sig os.Signal) {
 // 	switch sig {
 // 	case syscall.SIGTERM, syscall.SIGINT:
-// 		srv.Stop()
+// 		srv.Pause()
 // 	}
 // }
 

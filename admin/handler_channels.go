@@ -1,9 +1,11 @@
 package admin
 
 import (
+	"context"
 	"fmt"
-	"net/http"
 	"sort"
+
+	"github.com/oarkflow/frame"
 
 	"github.com/oarkflow/garagemq/metrics"
 	"github.com/oarkflow/garagemq/server"
@@ -29,11 +31,11 @@ type Channel struct {
 	Counters map[string]*metrics.TrackItem `json:"counters"`
 }
 
-func NewChannelsHandler(amqpServer *server.Server) http.Handler {
+func NewChannelsHandler(amqpServer *server.Server) *ChannelsHandler {
 	return &ChannelsHandler{amqpServer: amqpServer}
 }
 
-func (h *ChannelsHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+func (h *ChannelsHandler) Index(ctx context.Context, c *frame.Context) {
 	response := &ChannelsResponse{}
 	for _, conn := range h.amqpServer.GetConnections() {
 		for chID, ch := range conn.GetChannels() {
@@ -76,6 +78,70 @@ func (h *ChannelsHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request)
 			}
 		},
 	)
+	c.JSON(200, response)
+}
 
-	JSONResponse(resp, response, 200)
+type ChannelRequest struct {
+	ID          uint16 `json:"id"`
+	ConsumerTag string `json:"consumer_tag"`
+}
+
+func (h *ChannelsHandler) Delete(ctx context.Context, c *frame.Context) {
+	var channelConsumer ChannelRequest
+	err := c.Bind(&channelConsumer)
+	if err != nil {
+		c.JSON(500, err.Error())
+		return
+	}
+	for _, conn := range h.amqpServer.GetConnections() {
+		for chID, ch := range conn.GetChannels() {
+			if chID == channelConsumer.ID {
+				for _, consumer := range ch.Consumers() {
+					consumer.Stop()
+					ch.Close()
+					ch.Delete()
+				}
+			}
+		}
+	}
+}
+
+func (h *ChannelsHandler) Close(ctx context.Context, c *frame.Context) {
+	var channelConsumer ChannelRequest
+	err := c.Bind(&channelConsumer)
+	if err != nil {
+		c.JSON(500, err.Error())
+		return
+	}
+	for _, conn := range h.amqpServer.GetConnections() {
+		for chID, ch := range conn.GetChannels() {
+			if chID == channelConsumer.ID {
+				for _, consumer := range ch.Consumers() {
+					consumer.Stop()
+					ch.Close()
+				}
+			}
+		}
+	}
+}
+
+func (h *ChannelsHandler) DeleteConsumer(ctx context.Context, c *frame.Context) {
+	var channelConsumer ChannelRequest
+	err := c.Bind(&channelConsumer)
+	if err != nil {
+		c.JSON(500, err.Error())
+		return
+	}
+	for _, conn := range h.amqpServer.GetConnections() {
+		for chID, ch := range conn.GetChannels() {
+			if chID == channelConsumer.ID {
+				for _, consumer := range ch.Consumers() {
+					if consumer.ConsumerTag == channelConsumer.ConsumerTag {
+						ch.RemoveConsumer(channelConsumer.ConsumerTag)
+						c.JSON(200, "Consumer deleted from channel")
+					}
+				}
+			}
+		}
+	}
 }

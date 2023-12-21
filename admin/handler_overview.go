@@ -1,7 +1,9 @@
 package admin
 
 import (
-	"net/http"
+	"context"
+
+	"github.com/oarkflow/frame"
 
 	"github.com/oarkflow/garagemq/metrics"
 	"github.com/oarkflow/garagemq/server"
@@ -21,18 +23,18 @@ type Metric struct {
 	Sample []*metrics.TrackItem `json:"sample"`
 }
 
-func NewOverviewHandler(amqpServer *server.Server) http.Handler {
+func NewOverviewHandler(amqpServer *server.Server) *OverviewHandler {
 	return &OverviewHandler{amqpServer: amqpServer}
 }
 
-func (h *OverviewHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+func (h *OverviewHandler) Index(ctx context.Context, c *frame.Context) {
 	response := &OverviewResponse{
 		Counters: make(map[string]int),
 	}
 	h.populateMetrics(response)
 	h.populateCounters(response)
 
-	JSONResponse(resp, response, 200)
+	c.JSON(200, response)
 }
 
 func (h *OverviewHandler) populateMetrics(response *OverviewResponse) {

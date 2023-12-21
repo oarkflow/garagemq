@@ -1,8 +1,10 @@
 package admin
 
 import (
-	"net/http"
+	"context"
 	"sort"
+
+	"github.com/oarkflow/frame"
 
 	"github.com/oarkflow/garagemq/metrics"
 	"github.com/oarkflow/garagemq/server"
@@ -17,7 +19,7 @@ type ConnectionsResponse struct {
 }
 
 type Connection struct {
-	ID            int                `json:"id"`
+	ID            uint64             `json:"id"`
 	Vhost         string             `json:"vhost"`
 	Addr          string             `json:"addr"`
 	ChannelsCount int                `json:"channels_count"`
@@ -27,17 +29,17 @@ type Connection struct {
 	ToClient      *metrics.TrackItem `json:"to_client"`
 }
 
-func NewConnectionsHandler(amqpServer *server.Server) http.Handler {
+func NewConnectionsHandler(amqpServer *server.Server) *ConnectionsHandler {
 	return &ConnectionsHandler{amqpServer: amqpServer}
 }
 
-func (h *ConnectionsHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+func (h *ConnectionsHandler) Index(ctx context.Context, c *frame.Context) {
 	response := &ConnectionsResponse{}
 	for _, conn := range h.amqpServer.GetConnections() {
 		response.Items = append(
 			response.Items,
 			&Connection{
-				ID:            int(conn.GetID()),
+				ID:            conn.GetID(),
 				Vhost:         conn.GetVirtualHost().GetName(),
 				Addr:          conn.GetRemoteAddr().String(),
 				ChannelsCount: len(conn.GetChannels()),
@@ -55,6 +57,35 @@ func (h *ConnectionsHandler) ServeHTTP(resp http.ResponseWriter, req *http.Reque
 			return response.Items[i].ID > response.Items[j].ID
 		},
 	)
+	c.JSON(200, response)
+}
 
-	JSONResponse(resp, response, 200)
+func (h *ConnectionsHandler) Close(ctx context.Context, c *frame.Context) {
+	var con Connection
+	err := c.Bind(&con)
+	if err != nil {
+		c.JSON(500, err.Error())
+		return
+	}
+	for _, conn := range h.amqpServer.GetConnections() {
+		if conn.GetID() == con.ID {
+			conn.Close()
+			c.JSON(200, "Connection closed")
+		}
+	}
+}
+
+func (h *ConnectionsHandler) ClearQueues(ctx context.Context, c *frame.Context) {
+	var con Connection
+	err := c.Bind(&con)
+	if err != nil {
+		c.JSON(500, err.Error())
+		return
+	}
+	for _, conn := range h.amqpServer.GetConnections() {
+		if conn.GetID() == con.ID {
+			conn.ClearQueues()
+			c.JSON(200, "Queues cleared for connection")
+		}
+	}
 }

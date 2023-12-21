@@ -116,7 +116,7 @@ func (conn *Connection) initMetrics() {
 	}
 }
 
-func (conn *Connection) close() {
+func (conn *Connection) Close() {
 	conn.statusLock.Lock()
 	if conn.status == ConnClosed {
 		conn.statusLock.Unlock()
@@ -152,7 +152,7 @@ func (conn *Connection) close() {
 		delete(conn.channels, uint16(chID))
 	}
 	conn.channelsLock.Unlock()
-	conn.clearQueues()
+	conn.ClearQueues()
 
 	conn.logger.WithFields(log.Fields{
 		"vhost": conn.vhostName,
@@ -188,14 +188,14 @@ func (conn *Connection) safeClose() {
 
 	select {
 	case <-timeOut:
-		conn.close()
+		conn.Close()
 		return
 	case <-conn.closeCh:
 		return
 	}
 }
 
-func (conn *Connection) clearQueues() {
+func (conn *Connection) ClearQueues() {
 	virtualHost := conn.GetVirtualHost()
 	if virtualHost == nil {
 		// it is possible when conn Close before open, for example login failure
@@ -223,7 +223,7 @@ func (conn *Connection) handleConnection() {
 		conn.logger.WithError(err).WithFields(log.Fields{
 			"read buffer": buf,
 		}).Error("Error on read protocol header")
-		conn.close()
+		conn.Close()
 		return
 	}
 
@@ -237,7 +237,7 @@ func (conn *Connection) handleConnection() {
 			"supported": amqp.AmqpHeader,
 		}).Warn("Unsupported protocol")
 		_, _ = conn.netConn.Write(amqp.AmqpHeader)
-		conn.close()
+		conn.Close()
 		return
 	}
 
@@ -259,7 +259,7 @@ func (conn *Connection) handleOutgoing() {
 	defer func() {
 		close(conn.lastOutgoingTS)
 		conn.wg.Done()
-		conn.close()
+		conn.Close()
 	}()
 
 	var err error
@@ -336,7 +336,7 @@ func (conn *Connection) mayBeFlushBuffer(buffer *bufio.Writer) (err error) {
 func (conn *Connection) handleIncoming() {
 	defer func() {
 		conn.wg.Done()
-		conn.close()
+		conn.Close()
 	}()
 
 	buffer := bufio.NewReaderSize(conn.netConn, 128<<10)
