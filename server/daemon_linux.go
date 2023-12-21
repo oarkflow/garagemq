@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/coreos/go-systemd/daemon"
+	"github.com/sujit-baniya/go-systemd/daemon"
 )
 
 func daemonReady() {

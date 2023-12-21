@@ -453,6 +453,8 @@ func (conn *Connection) GetRemoteAddr() net.Addr {
 }
 
 func (conn *Connection) GetChannels() map[uint16]*Channel {
+	conn.channelsLock.Lock()
+	defer conn.channelsLock.Unlock()
 	return conn.channels
 }
 
