@@ -1,8 +1,10 @@
 package admin
 
 import (
-	"net/http"
+	"context"
 	"sort"
+
+	"github.com/oarkflow/frame"
 
 	"github.com/oarkflow/garagemq/metrics"
 	"github.com/oarkflow/garagemq/server"
@@ -26,11 +28,11 @@ type Queue struct {
 	Counters map[string]*metrics.TrackItem `json:"counters"`
 }
 
-func NewQueuesHandler(amqpServer *server.Server) http.Handler {
+func NewQueuesHandler(amqpServer *server.Server) *QueuesHandler {
 	return &QueuesHandler{amqpServer: amqpServer}
 }
 
-func (h *QueuesHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+func (h *QueuesHandler) Index(ctx context.Context, c *frame.Context) {
 	response := &QueuesResponse{}
 	for vhostName, vhost := range h.amqpServer.GetVhosts() {
 		for _, queue := range vhost.GetQueues() {
@@ -73,5 +75,5 @@ func (h *QueuesHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		},
 	)
 
-	JSONResponse(resp, response, 200)
+	c.JSON(200, response)
 }

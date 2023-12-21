@@ -1,7 +1,10 @@
 package admin
 
 import (
-	"net/http"
+	"context"
+
+	"github.com/oarkflow/frame"
+	"github.com/oarkflow/pkg/str"
 
 	"github.com/oarkflow/garagemq/server"
 )
@@ -20,28 +23,24 @@ type Binding struct {
 	RoutingKey string `json:"routing_key"`
 }
 
-func NewBindingsHandler(amqpServer *server.Server) http.Handler {
+func NewBindingsHandler(amqpServer *server.Server) *BindingsHandler {
 	return &BindingsHandler{amqpServer: amqpServer}
 }
 
-func (h *BindingsHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+func (h *BindingsHandler) Index(ctx context.Context, c *frame.Context) {
 	response := &BindingsResponse{}
-	req.ParseForm()
-	vhName := req.Form.Get("vhost")
-	exName := req.Form.Get("exchange")
-
+	vhName := str.FromByte(c.FormValue("vhost"))
+	exName := str.FromByte(c.FormValue("exchange"))
 	vhost := h.amqpServer.GetVhost(vhName)
 	if vhost == nil {
-		JSONResponse(resp, response, 200)
+		c.JSON(200, response)
 		return
 	}
-
 	exchange := vhost.GetExchange(exName)
 	if exchange == nil {
-		JSONResponse(resp, response, 200)
+		c.JSON(200, response)
 		return
 	}
-
 	for _, bind := range exchange.GetBindings() {
 		response.Items = append(
 			response.Items,
@@ -52,6 +51,5 @@ func (h *BindingsHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request)
 			},
 		)
 	}
-
-	JSONResponse(resp, response, 200)
+	c.JSON(200, response)
 }

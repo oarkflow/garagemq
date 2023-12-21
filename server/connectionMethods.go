@@ -66,7 +66,7 @@ func (channel *Channel) connectionStartOk(method *amqp.ConnectionStartOk) *amqp.
 	}
 
 	if method.Mechanism != auth.SaslPlain {
-		channel.conn.close()
+		channel.conn.Close()
 	}
 
 	if !channel.server.checkAuth(saslData) {
@@ -90,7 +90,7 @@ func (channel *Channel) connectionTuneOk(method *amqp.ConnectionTuneOk) *amqp.Er
 	channel.conn.status = ConnTuneOK
 
 	if method.ChannelMax > channel.conn.maxChannels || method.FrameMax > channel.conn.maxFrameSize {
-		channel.conn.close()
+		channel.conn.Close()
 		return nil
 	}
 
@@ -132,6 +132,6 @@ func (channel *Channel) connectionClose(method *amqp.ConnectionClose) *amqp.Erro
 }
 
 func (channel *Channel) connectionCloseOk(method *amqp.ConnectionCloseOk) *amqp.Error {
-	go channel.conn.close()
+	go channel.conn.Close()
 	return nil
 }

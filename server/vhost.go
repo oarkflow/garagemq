@@ -87,7 +87,7 @@ func NewVhost(name string, system bool, msgStoragePersistent *msgstorage.MsgStor
 
 func (vhost *VirtualHost) handleAutoDeleteQueue() {
 	for queueName := range vhost.autoDeleteQueue {
-		//time.Sleep(5 * time.Second)
+		// time.Sleep(5 * time.Second)
 		vhost.DeleteQueue(queueName, false, false)
 	}
 }
@@ -376,7 +376,7 @@ func (vhost *VirtualHost) Stop() error {
 	vhost.exLock.Lock()
 	defer vhost.quLock.Unlock()
 	defer vhost.exLock.Unlock()
-	vhost.logger.Info("Stop virtual host")
+	vhost.logger.Info("Pause virtual host")
 	for _, qu := range vhost.queues {
 		err := qu.Stop()
 		if err != nil {
