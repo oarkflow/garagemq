@@ -1,47 +1,11 @@
 import React from 'react';
 import ReactApexChart from 'react-apexcharts';
 
-export const StackedAreaChart = () => {
-    function generateDayWiseTimeSeries(baseval, count, yrange) {
-        let i = 0;
-        const series = [];
-        while (i < count) {
-            const x = baseval;
-            const y = Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min;
-            series.push([x, y]);
-            baseval += 86400000;
-            i++;
-        }
-        return series;
-    }
-
-    const series = [
-        {
-            name: 'South',
-            data: generateDayWiseTimeSeries(new Date('11 Feb 2017 GMT').getTime(), 20, {
-                min: 10,
-                max: 60
-            })
-        },
-        {
-            name: 'North',
-            data: generateDayWiseTimeSeries(new Date('11 Feb 2017 GMT').getTime(), 20, {
-                min: 10,
-                max: 20
-            })
-        },
-        {
-            name: 'Central',
-            data: generateDayWiseTimeSeries(new Date('11 Feb 2017 GMT').getTime(), 20, {
-                min: 10,
-                max: 15
-            })
-        }
-    ];
-    const options = {
+export const StackedAreaChart = ({series, height, colors, dataOptions}) => {
+    let options = {
         chart: {
             type: 'area',
-            height: 350,
+            height: height,
             stacked: true,
             events: {
                 selection: function (chart, e) {
@@ -49,7 +13,7 @@ export const StackedAreaChart = () => {
                 }
             }
         },
-        colors: ['#008FFB', '#00E396', '#CED4DC'],
+        colors: colors,
         dataLabels: {
             enabled: false
         },
@@ -66,17 +30,20 @@ export const StackedAreaChart = () => {
         legend: {
             position: 'top',
             horizontalAlign: 'left'
-        },
-        xaxis: {
-            type: 'datetime'
-        },
-        title: {
-            text: 'Message Rate'
         }
     };
+    if (dataOptions.hasOwnProperty('title')) {
+        options.title = {text: dataOptions.title}
+    }
+    if (dataOptions.hasOwnProperty('xaxis')) {
+        options.xaxis = dataOptions.xaxis
+    }
+    if (dataOptions.hasOwnProperty('yaxis')) {
+        options.yaxis = dataOptions.yaxis
+    }
     return (
-        <div id="chart">
-            <ReactApexChart options={options} series={series} type="area" height={350}/>
+        <div>
+            <ReactApexChart options={options} series={series} type="area" height={height}/>
         </div>
     );
 };

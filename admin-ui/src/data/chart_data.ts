@@ -1,37 +1,36 @@
-export const data = [
+const generateDayWiseTimeSeries = (baseval, count, yrange) => {
+    let i = 0;
+    const series = [];
+    while (i < count) {
+        const x = baseval;
+        const y = Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min;
+        series.push([x, y]);
+        baseval += 86400000;
+        i++;
+    }
+    return series;
+}
+
+export const series = [
     {
-        x: 1,
-        groupA: 38,
-        groupB: 19,
-        groupC: 9,
-        groupD: 4
+        name: 'South',
+        data: generateDayWiseTimeSeries(new Date('11 Feb 2017 GMT').getTime(), 20, {
+            min: 10,
+            max: 60
+        })
     },
     {
-        x: 2,
-        groupA: 16,
-        groupB: 14,
-        groupC: 96,
-        groupD: 40
+        name: 'North',
+        data: generateDayWiseTimeSeries(new Date('11 Feb 2017 GMT').getTime(), 20, {
+            min: 10,
+            max: 20
+        })
     },
     {
-        x: 3,
-        groupA: 64,
-        groupB: 96,
-        groupC: 64,
-        groupD: 40
-    },
-    {
-        x: 4,
-        groupA: 32,
-        groupB: 48,
-        groupC: 64,
-        groupD: 40
-    },
-    {
-        x: 5,
-        groupA: 12,
-        groupB: 18,
-        groupC: 14,
-        groupD: 10
+        name: 'Central',
+        data: generateDayWiseTimeSeries(new Date('11 Feb 2017 GMT').getTime(), 20, {
+            min: 10,
+            max: 15
+        })
     }
 ];

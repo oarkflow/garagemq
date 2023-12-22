@@ -1,0 +1,1 @@
+export const apiUrl = (url ?: string) => url || import.meta.env.VITE_API_URL || '';

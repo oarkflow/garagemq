@@ -1,8 +1,13 @@
 // import {lazy} from 'react';
-import {Navigate, RouteObject} from 'react-router-dom';
+import {RouteObject} from 'react-router-dom';
 import {AppLayout} from '@/views/layouts/AppLayout';
-import {Main} from '@/views/main/main';
-import {NotFound} from '@/views/notfound/notfound';
+import {Home} from '@/views/Home';
+import {Error404} from "@/views/errors/404";
+import {Connections} from "@/views/connections";
+import {Channels} from "@/views/channels";
+import {Exchanges} from "@/views/exchanges";
+import {Queues} from "@/views/queues";
+import {Consumers} from "@/views/consumers";
 
 // const Main = lazy(() => import('@/views/main/main'));
 // const NotFound = lazy(() => import('@/views/notfound/notfound'));
@@ -13,15 +18,31 @@ const routes: RouteObject[] = [
         children: [
             {
                 path: '/',
-                element: <Navigate to="/main"/>
+                element: <Home/>
             },
             {
-                path: '/main',
-                element: <Main/>
+                path: '/connections',
+                element: <Connections/>
+            },
+            {
+                path: '/channels',
+                element: <Channels/>
+            },
+            {
+                path: '/exchanges',
+                element: <Exchanges/>
+            },
+            {
+                path: '/queues',
+                element: <Queues/>
+            },
+            {
+                path: '/consumers',
+                element: <Consumers/>
             },
             {
                 path: '*',
-                element: <NotFound/>
+                element: <Error404/>
             }
         ]
     }

@@ -1,5 +1,5 @@
 import {StackedAreaChart} from '@/components/StackedAreaChart';
-import {data} from '@/data/chart_data';
+import {series} from '@/data/chart_data';
 import '@/styles/app.css';
 
 interface ReportProps {
@@ -16,25 +16,29 @@ const Report = ({title, data}: ReportProps) => {
     );
 };
 
-export const Main = () => {
+export const Home = () => {
     return (
         <div>
             <h1 className="text-3xl font-semibold">
                 Test Server 2 <span className="font-normal text-base">@ 192.168.1.64</span>
             </h1>
-            <div className="flex flex-wrap gap-5 pt-4 justify-between">
-                <Report title="Total Messages In" data="337.51m"/>
-                <Report title="Total Messages Out" data="345.99m"/>
-                <Report title="Total Data Volume In" data="60.94GB"/>
-                <Report title="Total Data Volume Out" data="62.46GB"/>
-                <Report title="Message In Rate" data="1.37k"/>
-                <Report title="Message Out Rate" data="1.89k"/>
-                <Report title="Incoming Data Rate" data="247.61KB/s"/>
-                <Report title="Outgoing Data Rate" data="337.94KB/s"/>
+            <div className="flex gap-20 pt-4 justify-between">
+                <div className="w-full flex flex-wrap gap-5 justify-between">
+                    <Report title="Total Messages In" data="337.51m"/>
+                    <Report title="Total Messages Out" data="345.99m"/>
+                    <Report title="Total Data Volume In" data="60.94GB"/>
+                    <Report title="Total Data Volume Out" data="62.46GB"/>
+                </div>
+                <div className="w-full flex flex-wrap gap-5 justify-between">
+                    <Report title="Message In Rate" data="1.37k"/>
+                    <Report title="Message Out Rate" data="1.89k"/>
+                    <Report title="Incoming Data Rate" data="247.61KB/s"/>
+                    <Report title="Outgoing Data Rate" data="337.94KB/s"/>
+                </div>
             </div>
             <div className="grid lg:grid-cols-2 pt-10 gap-10">
-                <StackedAreaChart width="500" height={200} data={data}/>
-                <StackedAreaChart width="500" height={200} data={data}/>
+                <StackedAreaChart series={series} colors={['#008FFB', '#00E396', '#CED4DC']} dataOptions={{title: "Message Rate", xaxis:{type:"datetime"}, yaxis:{type:"number"}}} height={350}/>
+                <StackedAreaChart series={series} colors={['#008FFB', '#00E396', '#CED4DC']} dataOptions={{title: "Traffic Volume", xaxis:{type:"datetime"}, yaxis:{type:"number"}}} height={350}/>
             </div>
             <div className="gap-10 pl-5">
                 <div>
