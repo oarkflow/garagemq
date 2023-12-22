@@ -246,7 +246,6 @@ export const Table = ({
             } else {
                 setTableHeight(`calc(90svh + ${offset}px)`);
             }
-            console.log(offset)
             setTableMaxHeight(`calc(90svh + ${offset}px)`);
         }
     }, [tableRef]);

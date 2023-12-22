@@ -1,66 +1,101 @@
 import {Table} from "@/components/table";
-import {makeData} from "@/data/makeData";
 import {ColumnDef} from "@tanstack/table-core";
+import {effect} from "@preact/signals";
+import {HttpClient} from "@/helpers/api";
+import {useState} from "react";
 
 export const Channels = () => {
+    const [channels, setChannels] = useState([])
+    const transformRate = (trackValue) => {
+        if (!trackValue || !trackValue.value) {
+            return '0/s'
+        }
+
+        return trackValue.value + '/s'
+    };
     const columns: ColumnDef[] = [
         {
-            accessorKey: "id",
-            header: "ID",
+            accessorKey: "ConnID",
+            header: "Connection ID",
         },
         {
-            accessorKey: "first_name",
-            header: "First Name",
-            id: "first_name",
+            accessorKey: "ChannelID",
+            header: "Channel ID",
         },
         {
-            accessorKey: "last_name",
-            header: "Last Name",
-            id: "last_name",
-        },
-
-        {
-            accessorFn: (row) => `${row.first_name} ${row.last_name}`,
-            header: "Full Name",
-            accessorKey: "full_name",
+            accessorKey: "channel",
+            header: "Channel",
         },
         {
-            accessorKey: "dob",
-            header: "Date of Birth",
+            accessorKey: "vhost",
+            header: "Vhost",
         },
         {
-            accessorKey: "age",
-            header: "Age",
+            accessorKey: "user",
+            header: "User",
         },
         {
-            accessorKey: "visits",
-            header: "Visits",
+            accessorKey: "qos",
+            header: "Qos",
         },
         {
-            accessorKey: "status",
-            header: "Status",
+            accessorKey: "confirm",
+            header: "Confirm",
         },
         {
-            accessorKey: "progress",
-            header: "Profile Progress",
-            // className: 'freeze-data-right',
-            // headerClassName: 'freeze-header-right !font-bold'
-        }
+            accessorFn: (row) => `${transformRate(row.counters.ack)}`,
+            header: "Ack",
+            accessorKey: "ack",
+        },
+        {
+            accessorFn: (row) => `${transformRate(row.counters.confirm)}`,
+            header: "Confirm",
+            accessorKey: "confirm_count",
+        },
+        {
+            accessorFn: (row) => `${transformRate(row.counters.deliver)}`,
+            header: "Deliver",
+            accessorKey: "deliver",
+        },
+        {
+            accessorFn: (row) => `${transformRate(row.counters.publish)}`,
+            header: "Publish",
+            accessorKey: "publish",
+        },
+        {
+            accessorFn: (row) => `${transformRate(row.counters.get)}`,
+            header: "Get",
+            accessorKey: "get",
+        },
+        {
+            accessorFn: (row) => `${transformRate(row.counters.unacked)}`,
+            header: "Unacked",
+            accessorKey: "unacked",
+        },
     ];
+    effect(() => {
+        HttpClient.get("/channels").then(response => {
+            if(response.data.hasOwnProperty('items')) {
+                setChannels(response.data.items)
+            }
+        })
+    })
     return (
-        <Table
-            title="Connections"
-            className="p-2 overflow-hidden bg-white border rounded-md"
-            columns={columns}
-            rows={makeData(500)}
-            canGlobalFilter={true}
-            canToggleColumns={false}
-            canColumnFilter={false}
-            controlPosition="top"
-            selectableWithCheckbox={false}
-            canPaginate={true}
-            canChangeInterval={true}
-            canResizeColumn={false}
-        />
+        <>
+            <Table
+                title="Channels"
+                className="p-2 overflow-hidden bg-white border rounded-md"
+                columns={columns}
+                rows={channels}
+                canGlobalFilter={true}
+                canToggleColumns={false}
+                canColumnFilter={false}
+                controlPosition="top"
+                selectableWithCheckbox={false}
+                canPaginate={true}
+                canChangeInterval={true}
+                canResizeColumn={false}
+            />
+        </>
     )
 }

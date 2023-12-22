@@ -1,6 +1,10 @@
 import {StackedAreaChart} from '@/components/StackedAreaChart';
 import {series} from '@/data/chart_data';
 import '@/styles/app.css';
+import {HttpClient} from "@/helpers/api";
+import {effect} from "@preact/signals";
+import {useEffect, useState} from "react";
+import {humanFileSize, humanNumber} from "@/helpers/string";
 
 interface ReportProps {
     title: string;
@@ -16,25 +20,124 @@ const Report = ({title, data}: ReportProps) => {
     );
 };
 
+const QueuedMessage = ({metrics}: ReportProps) => {
+    return (
+        <div className="bg-white p-5 rounded-md border border-gray-100 shadow-sm">
+            <div className="text-gray text-md border-b pb-2">Queued Messages</div>
+            <div className="text-4xl py-2">{humanNumber(metrics?.total.value || 0)} <span className="text-lg">Total</span></div>
+            <div className="text-sm pt-1 pl-2">
+                <span>
+                    {humanNumber(metrics?.ready.value || 0 )} <span className="text-xs">Ready</span>
+                </span> / <span>{humanNumber(metrics?.unacked.value || 2 )} <span className="text-xs">Unacked</span>
+                </span>
+            </div>
+        </div>
+    );
+};
+
+const MessagesCard = ({metrics}: ReportProps) => {
+    return (
+        <div className="bg-white p-5 rounded-md border border-gray-100 shadow-sm">
+            <div className="text-gray text-md border-b pb-2">Messages Count</div>
+            <div className="flex gap-10 pt-2">
+                <div className="min-w-28">
+                    <div>Confirm</div>
+                    <div className="text-3xl pt-1">{humanNumber(metrics?.confirm.value || 0)}</div>
+                </div>
+                <div className="min-w-28">
+                    <div>Publish</div>
+                    <div className="text-3xl pt-1">{humanNumber(metrics?.publish.value || 0)}</div>
+                </div>
+                <div className="min-w-28">
+                    <div>Deliver</div>
+                    <div className="text-3xl pt-1">{humanNumber(metrics?.deliver.value || 0)}</div>
+                </div>
+                <div className="min-w-28">
+                    <div>Acks</div>
+                    <div className="text-3xl pt-1">{humanNumber(metrics?.acknowledge.value || 0)}</div>
+                </div>
+                <div>
+                    <div>Get</div>
+                    <div className="text-3xl pt-1">{humanNumber(metrics?.get.value || 0)}</div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const TrafficCard = ({metrics}: ReportProps) => {
+    return (
+        <div className="bg-white p-5 rounded-md border border-gray-100 shadow-sm">
+            <div className="text-gray text-md border-b pb-2">Traffic Volume</div>
+            <div className="flex gap-10 pt-2">
+                <div className="min-w-28">
+                    <div>IN</div>
+                    <div className="text-3xl pt-1">{humanFileSize(metrics?.traffic_in.value || 0)}</div>
+                </div>
+                <div className="min-w-28">
+                    <div>Out</div>
+                    <div className="text-3xl pt-1">{humanFileSize(metrics?.traffic_out.value || 0)}</div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 export const Home = () => {
+    const [metrics, setMetrics] = useState({})
+    const [counters, setCounters] = useState()
+    const [serverInfo, setServerInfo] = useState()
+    const updateMetrics = (data) => {
+        let metricsData = data.metrics ? data.metrics : [];
+        let mt = {}
+        metricsData.forEach((metric) => {
+            if (metric.name === 'server.traffic_in' || metric.name === 'server.traffic_out') {
+                metric.sample = metric.sample.map((sample) => {
+                    if (sample) {
+                        // convert to MB/s
+                        sample.value = humanFileSize(sample.value) + "/s"
+                    }
+                    return sample
+                })
+                mt[metric.name.replaceAll('server.', '')] = {
+                    sample: metric.sample,
+                    value: metric.value,
+                }
+                return mt
+            } else {
+                mt[metric.name.replaceAll('server.', '')] = {
+                    sample: metric.sample,
+                    value: metric.value,
+                }
+                return mt
+            }
+        })
+        setMetrics({server: mt})
+    }
+    const getOverview = () => {
+        HttpClient.get("/overview").then(response => {
+            if(response.data.hasOwnProperty('metrics')) {
+                updateMetrics(response.data)
+                setServerInfo(response.data.server_info)
+                setCounters(response.data.counters)
+                setTimeout(() => {
+                    getOverview()
+                }, 2000)
+            }
+        })
+    }
+    useEffect(() => {
+        getOverview()
+    }, []);
     return (
         <div>
             <h1 className="text-3xl font-semibold">
-                Test Server 2 <span className="font-normal text-base">@ 192.168.1.64</span>
+                {serverInfo?.name} <span className="font-normal text-base">@ {serverInfo?.url}</span>
             </h1>
-            <div className="flex gap-20 pt-4 justify-between">
-                <div className="w-full flex flex-wrap gap-5 justify-between">
-                    <Report title="Total Messages In" data="337.51m"/>
-                    <Report title="Total Messages Out" data="345.99m"/>
-                    <Report title="Total Data Volume In" data="60.94GB"/>
-                    <Report title="Total Data Volume Out" data="62.46GB"/>
-                </div>
-                <div className="w-full flex flex-wrap gap-5 justify-between">
-                    <Report title="Message In Rate" data="1.37k"/>
-                    <Report title="Message Out Rate" data="1.89k"/>
-                    <Report title="Incoming Data Rate" data="247.61KB/s"/>
-                    <Report title="Outgoing Data Rate" data="337.94KB/s"/>
-                </div>
+            <div className="flex flex-wrap gap-5 pt-4">
+                <QueuedMessage metrics={metrics?.server} />
+                <MessagesCard metrics={metrics?.server} />
+                <TrafficCard metrics={metrics?.server} />
             </div>
             <div className="grid lg:grid-cols-2 pt-10 gap-10">
                 <StackedAreaChart series={series} colors={['#008FFB', '#00E396', '#CED4DC']} dataOptions={{title: "Message Rate", xaxis:{type:"datetime"}, yaxis:{type:"number"}}} height={350}/>

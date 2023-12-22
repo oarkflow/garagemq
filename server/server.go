@@ -435,6 +435,20 @@ func (srv *Server) getConfirmChannel(meta *amqp.ConfirmMeta) *Channel {
 	return conn.getChannel(meta.ChanID)
 }
 
+type ServerInfo struct {
+	ID   uint64 `json:"id"`
+	Name string `json:"name"`
+	URL  string `json:"url"`
+}
+
+func (srv *Server) GetInfo() ServerInfo {
+	return ServerInfo{
+		ID:   srv.connSeq,
+		Name: fmt.Sprintf("%s:%s", srv.host, srv.port),
+		URL:  fmt.Sprintf("%s:%s", srv.host, srv.port),
+	}
+}
+
 func (srv *Server) GetVhost(name string) *VirtualHost {
 	return srv.getVhost(name)
 }

@@ -9,14 +9,14 @@ import {setupCache} from "axios-cache-interceptor";
 const baseURL = apiUrl();
 const uploadURL = "/media/upload";
 
-const axiosInstance = setupCache(axios.create({
+const axiosInstance = axios.create({
     // @ts-ignore
     baseURL: baseURL,
     maxRedirects: 0,
     validateStatus: function (status: number) {
         return status >= 200 && status < 300;
     },
-}));
+});
 const updateEndTime = (response) => {
     response.customData = response.customData || {};
     response.customData.time =

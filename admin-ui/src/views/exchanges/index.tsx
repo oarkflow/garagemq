@@ -1,66 +1,73 @@
 import {Table} from "@/components/table";
-import {makeData} from "@/data/makeData";
 import {ColumnDef} from "@tanstack/table-core";
+import {effect} from "@preact/signals";
+import {HttpClient} from "@/helpers/api";
+import {useState} from "react";
 
 export const Exchanges = () => {
+    const [exchanges, setExchanges] = useState([])
+    const transformRate = (trackValue) => {
+        if (!trackValue || !trackValue.value) {
+            return '0/s'
+        }
+
+        return trackValue.value + '/s'
+    }
     const columns: ColumnDef[] = [
         {
-            accessorKey: "id",
-            header: "ID",
+            accessorKey: "name",
+            header: "Name",
         },
         {
-            accessorKey: "first_name",
-            header: "First Name",
-            id: "first_name",
+            accessorKey: "vhost",
+            header: "Vhost",
         },
         {
-            accessorKey: "last_name",
-            header: "Last Name",
-            id: "last_name",
-        },
-
-        {
-            accessorFn: (row) => `${row.first_name} ${row.last_name}`,
-            header: "Full Name",
-            accessorKey: "full_name",
+            accessorKey: "type",
+            header: "Type",
         },
         {
-            accessorKey: "dob",
-            header: "Date of Birth",
+            accessorKey: "durable",
+            header: "Durable",
         },
         {
-            accessorKey: "age",
-            header: "Age",
+            accessorKey: "internal",
+            header: "Internal",
         },
         {
-            accessorKey: "visits",
-            header: "Visits",
+            accessorFn: (row) => `${transformRate(row.msg_rate_in)}`,
+            header: "Message Rate IN",
+            accessorKey: "msg_rate_in",
         },
         {
-            accessorKey: "status",
-            header: "Status",
+            accessorFn: (row) => `${transformRate(row.msg_rate_out)}`,
+            header: "Message Rate OUT",
+            accessorKey: "msg_rate_out",
         },
-        {
-            accessorKey: "progress",
-            header: "Profile Progress",
-            // className: 'freeze-data-right',
-            // headerClassName: 'freeze-header-right !font-bold'
-        }
     ];
+    effect(() => {
+        HttpClient.get("/exchanges").then(response => {
+            if(response.data.hasOwnProperty('items')) {
+                setExchanges(response.data.items)
+            }
+        })
+    })
     return (
-        <Table
-            title="Connections"
-            className="p-2 overflow-hidden bg-white border rounded-md"
-            columns={columns}
-            rows={makeData(500)}
-            canGlobalFilter={true}
-            canToggleColumns={false}
-            canColumnFilter={false}
-            controlPosition="top"
-            selectableWithCheckbox={false}
-            canPaginate={true}
-            canChangeInterval={true}
-            canResizeColumn={false}
-        />
+        <>
+            <Table
+                title="Exchanges"
+                className="p-2 overflow-hidden bg-white border rounded-md"
+                columns={columns}
+                rows={exchanges}
+                canGlobalFilter={true}
+                canToggleColumns={false}
+                canColumnFilter={false}
+                controlPosition="top"
+                selectableWithCheckbox={false}
+                canPaginate={true}
+                canChangeInterval={true}
+                canResizeColumn={false}
+            />
+        </>
     )
 }

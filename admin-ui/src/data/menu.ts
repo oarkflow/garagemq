@@ -2,6 +2,7 @@ import {MdHome} from "react-icons/md";
 import {LuNetwork} from "react-icons/lu";
 import {GrNetwork, GrUserWorker} from "react-icons/gr";
 import {CgGhost} from "react-icons/cg";
+import {PiQueue} from "react-icons/pi";
 
 export const menuItems = [
     {
@@ -20,9 +21,14 @@ export const menuItems = [
         path: "/channels",
     },
     {
+        title: "Queues",
+        icon: PiQueue,
+        path: "/queues",
+    },
+    {
         title: "Exchanges",
         icon: GrNetwork,
-        path: "/channels",
+        path: "/exchanges",
     },
     {
         title: "Consumers",

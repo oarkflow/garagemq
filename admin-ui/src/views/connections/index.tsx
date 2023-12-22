@@ -1,66 +1,85 @@
 import {Table} from "@/components/table";
 import {ColumnDef} from "@tanstack/table-core";
-import {makeData} from "@/data/makeData";
+import {effect} from "@preact/signals";
+import {HttpClient} from "@/helpers/api";
+import {useState} from "react";
 
 export const Connections = () => {
+    const [connections, setConnections] = useState([])
+    const transformTraffic = (trackValue) => {
+        let value = 0;
+        if (trackValue) {
+            value = trackValue.value;
+        }
+        if (value > 1024 * 1024) {
+            value = Math.round(value * 100 / 1024 / 1024) / 100;
+            return value + ' MB/s';
+        } else if (value > 1024) {
+            value = Math.round(value * 100 / 1024) / 100;
+            return value + ' KB/s';
+        } else {
+            return value + ' B/s';
+        }
+    }
     const columns: ColumnDef[] = [
         {
             accessorKey: "id",
-            header: "ID",
+            header: "Connection ID",
         },
         {
-            accessorKey: "first_name",
-            header: "First Name",
-            id: "first_name",
+            accessorKey: "vhost",
+            header: "Vhost",
+            id: "vhost",
         },
         {
-            accessorKey: "last_name",
-            header: "Last Name",
-            id: "last_name",
-        },
-
-        {
-            accessorFn: (row) => `${row.first_name} ${row.last_name}`,
-            header: "Full Name",
-            accessorKey: "full_name",
+            accessorKey: "channels_count",
+            header: "Channels",
+            id: "channels_count",
         },
         {
-            accessorKey: "dob",
-            header: "Date of Birth",
+            accessorKey: "user",
+            header: "User",
+            id: "user",
         },
         {
-            accessorKey: "age",
-            header: "Age",
+            accessorKey: "protocol",
+            header: "Protocol",
+            id: "protocol",
         },
         {
-            accessorKey: "visits",
-            header: "Visits",
+            accessorFn: (row) => `${transformTraffic(row.from_client)}`,
+            header: "From",
+            accessorKey: "from",
         },
         {
-            accessorKey: "status",
-            header: "Status",
+            accessorFn: (row) => `${transformTraffic(row.to_client)}`,
+            header: "To",
+            accessorKey: "to",
         },
-        {
-            accessorKey: "progress",
-            header: "Profile Progress",
-            // className: 'freeze-data-right',
-            // headerClassName: 'freeze-header-right !font-bold'
-        }
     ];
+    effect(() => {
+        HttpClient.get("/connections").then(response => {
+            if(response.data.hasOwnProperty('items')) {
+                setConnections(response.data.items)
+            }
+        })
+    })
     return (
-        <Table
-            title="Connections"
-            className="p-2 overflow-hidden bg-white border rounded-md"
-            columns={columns}
-            rows={makeData(500)}
-            canGlobalFilter={true}
-            canToggleColumns={false}
-            canColumnFilter={false}
-            controlPosition="top"
-            selectableWithCheckbox={false}
-            canPaginate={true}
-            canChangeInterval={true}
-            canResizeColumn={false}
-        />
+        <>
+            <Table
+                title="Connections"
+                className="p-2 overflow-hidden bg-white border rounded-md"
+                columns={columns}
+                rows={connections}
+                canGlobalFilter={true}
+                canToggleColumns={false}
+                canColumnFilter={false}
+                controlPosition="top"
+                selectableWithCheckbox={false}
+                canPaginate={true}
+                canChangeInterval={true}
+                canResizeColumn={false}
+            />
+        </>
     )
 }

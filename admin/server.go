@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/oarkflow/frame/middlewares/server/cors"
+
 	"github.com/oarkflow/garagemq/server"
 
 	frameServer "github.com/oarkflow/frame/server"
@@ -17,7 +19,7 @@ type Server struct {
 func NewServer(amqpServer *server.Server, host string, port string) *Server {
 	url := fmt.Sprintf("%s:%s", host, port)
 	srv := frameServer.Default(frameServer.WithHostPorts(url))
-
+	srv.Use(cors.Default())
 	consumerHandler := NewConsumerHandler(amqpServer)
 	bindHandler := NewBindingsHandler(amqpServer)
 	overviewHandler := NewOverviewHandler(amqpServer)

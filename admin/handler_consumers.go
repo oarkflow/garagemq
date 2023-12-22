@@ -2,17 +2,24 @@ package admin
 
 import (
 	"context"
+	"fmt"
+	"sort"
 
 	"github.com/oarkflow/frame"
-	"github.com/oarkflow/frame/pkg/common/utils"
 
 	"github.com/oarkflow/garagemq/server"
 )
 
 type Consumer struct {
-	ID    uint64 `json:"id"`
-	Tag   string `json:"tag"`
-	Queue string `json:"queue"`
+	ID        uint64 `json:"id"`
+	ChannelID uint16 `json:"channel_id"`
+	Channel   string `json:"channel"`
+	Tag       string `json:"tag"`
+	Queue     string `json:"queue"`
+}
+
+type ConsumerResponse struct {
+	Items []Consumer `json:"items"`
 }
 
 type ConsumerHandler struct {
@@ -26,23 +33,27 @@ func NewConsumerHandler(amqpServer *server.Server) *ConsumerHandler {
 }
 
 func (h *ConsumerHandler) Index(ctx context.Context, c *frame.Context) {
-	var consumers []Consumer
+	var response ConsumerResponse
 	for _, con := range h.amqpServer.GetConnections() {
-		for _, ch := range con.GetChannels() {
+		for chID, ch := range con.GetChannels() {
 			for _, consumer := range ch.Consumers() {
-				consumers = append(consumers, Consumer{
-					ID:    consumer.ID,
-					Tag:   consumer.ConsumerTag,
-					Queue: consumer.Queue,
+				response.Items = append(response.Items, Consumer{
+					ID:        consumer.ID,
+					Tag:       consumer.ConsumerTag,
+					Queue:     consumer.Queue,
+					ChannelID: chID,
+					Channel:   fmt.Sprintf("%s (%d)", con.GetRemoteAddr().String(), chID),
 				})
 			}
 		}
 	}
-	c.JSON(200, utils.H{
-		"data": utils.H{
-			"consumers": consumers,
+	sort.Slice(
+		response.Items,
+		func(i, j int) bool {
+			return response.Items[i].ID > response.Items[j].ID
 		},
-	})
+	)
+	c.JSON(200, response)
 }
 
 func (h *ConsumerHandler) Pause(ctx context.Context, c *frame.Context) {
