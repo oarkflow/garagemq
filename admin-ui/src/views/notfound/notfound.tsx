@@ -1,12 +1,9 @@
-import { memo } from 'react';
-import type { FC, ReactNode } from 'react';
+import type {FC, ReactNode} from 'react';
 
 interface IProps {
-  children?: ReactNode;
+    children?: ReactNode;
 }
 
-const notfound: FC<IProps> = () => {
-  return <div>notfound</div>;
+export const NotFound: FC<IProps> = () => {
+    return <div>notfound</div>;
 };
-
-export default memo(notfound);

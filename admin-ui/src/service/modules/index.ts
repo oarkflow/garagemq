@@ -1,29 +1,29 @@
 import request from '..';
 
 interface IGetResponseDemo {
-  id: number;
+    id: number;
 }
 
 export const getDemo = () => {
-  return request.get<IGetResponseDemo>({
-    url: '/demo',
-    params: {
-      id: 1
-    }
-  });
+    return request.get<IGetResponseDemo>({
+        url: '/demo',
+        params: {
+            id: 1
+        }
+    });
 };
 
 interface IPostRequestDemo {
-  id: number;
+    id: number;
 }
 
 interface IPostResponseDemo {
-  id: number;
+    id: number;
 }
 
 export const postDemo = (data: IPostRequestDemo) => {
-  return request.post<IPostResponseDemo>({
-    url: '/demo',
-    data
-  });
+    return request.post<IPostResponseDemo>({
+        url: '/demo',
+        data
+    });
 };

@@ -1,6 +1,6 @@
-import {Outlet} from 'react-router-dom'
-import {Suspense} from "react";
-import {Sidebar} from "@/components/Sidebar";
+import {Outlet} from 'react-router-dom';
+import {Suspense} from 'react';
+import {Sidebar} from '@/components/Sidebar';
 
 export const AppLayout = () => {
     return (
@@ -16,8 +16,6 @@ export const AppLayout = () => {
                     </div>
                 </div>
             </div>
-
-
         </div>
-    )
-}
+    );
+};

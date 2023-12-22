@@ -1,5 +1,5 @@
-import React from "react";
-import ReactApexChart from "react-apexcharts"
+import React from 'react';
+import ReactApexChart from 'react-apexcharts';
 
 export const StackedAreaChart = () => {
     function generateDayWiseTimeSeries(baseval, count, yrange) {
@@ -14,6 +14,7 @@ export const StackedAreaChart = () => {
         }
         return series;
     }
+
     const series = [
         {
             name: 'South',
@@ -36,46 +37,46 @@ export const StackedAreaChart = () => {
                 max: 15
             })
         }
-    ]
+    ];
     const options = {
-            chart: {
-                type: 'area',
-                height: 350,
-                stacked: true,
-                events: {
-                    selection: function (chart, e) {
-                        console.log(new Date(e.xaxis.min))
-                    }
-                },
-            },
-            colors: ['#008FFB', '#00E396', '#CED4DC'],
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                curve: 'smooth'
-            },
-            fill: {
-                type: 'gradient',
-                gradient: {
-                    opacityFrom: 0.6,
-                    opacityTo: 0.8,
+        chart: {
+            type: 'area',
+            height: 350,
+            stacked: true,
+            events: {
+                selection: function (chart, e) {
+                    console.log(new Date(e.xaxis.min));
                 }
-            },
-            legend: {
-                position: 'top',
-                horizontalAlign: 'left'
-            },
-            xaxis: {
-                type: 'datetime'
-            },
-            title: {
-                text: "Message Rate"
             }
+        },
+        colors: ['#008FFB', '#00E396', '#CED4DC'],
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            curve: 'smooth'
+        },
+        fill: {
+            type: 'gradient',
+            gradient: {
+                opacityFrom: 0.6,
+                opacityTo: 0.8
+            }
+        },
+        legend: {
+            position: 'top',
+            horizontalAlign: 'left'
+        },
+        xaxis: {
+            type: 'datetime'
+        },
+        title: {
+            text: 'Message Rate'
         }
+    };
     return (
         <div id="chart">
-            <ReactApexChart options={options} series={series} type="area" height={350} />
+            <ReactApexChart options={options} series={series} type="area" height={350}/>
         </div>
-    )
-}
+    );
+};
