@@ -190,9 +190,6 @@ export const Home = () => {
                 <StackedAreaChart series={messages} dataOptions={{title: "Messages", xaxis:{type:"datetime"}, yaxis:{type:"number"}}} height={300}/>
                 <StackedAreaChart series={traffic} colors={['#008FFB', '#00E396']} dataOptions={{title: "Traffic Volume", xaxis:{type:"datetime"}, yaxis:{type:"number"}}} height={300}/>
             </div>
-            <div className="w-100 h-80">
-                <Example/>
-            </div>
             <div className="gap-10 pl-5">
                 <Queues data={queues}/>
             </div>

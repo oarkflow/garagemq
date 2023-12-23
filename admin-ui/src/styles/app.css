@@ -1,3 +1,7 @@
 tbody tr {
     @apply !hover:bg-light-blue-50 !dark:hover:bg-gray-700 !hover:border-t !hover:border-b !hover:border-light-blue-200
 }
+
+.recharts-legend-wrapper{
+    @apply p-4 text-xs
+}
