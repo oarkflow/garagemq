@@ -101,14 +101,14 @@ export const Home = () => {
         let ts = []
         metricsData.forEach((metric) => {
             let name = metric.name.replaceAll('server.', '')
-            if (metric.name === 'server.traffic_in' || metric.name === 'server.traffic_out') {
+            /*if (metric.name === 'server.traffic_in' || metric.name === 'server.traffic_out') {
                 metric.sample = metric.sample.map((sample) => {
                     if (sample) {
                         sample.value = humanFileSize(sample.value) + "/s"
                     }
                     return sample
                 })
-            }
+            }*/
             mt[name] = {
                 sample: metric.sample,
                 value: metric.value,
