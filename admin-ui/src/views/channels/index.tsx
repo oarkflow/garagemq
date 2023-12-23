@@ -2,7 +2,7 @@ import {Table} from "@/components/table";
 import {ColumnDef} from "@tanstack/table-core";
 import {effect} from "@preact/signals";
 import {HttpClient} from "@/helpers/api";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
 export const Channels = () => {
     const [channels, setChannels] = useState([])
@@ -73,13 +73,13 @@ export const Channels = () => {
             accessorKey: "unacked",
         },
     ];
-    effect(() => {
+    useEffect(() => {
         HttpClient.get("/channels").then(response => {
             if(response.data.hasOwnProperty('items')) {
                 setChannels(response.data.items)
             }
         })
-    })
+    }, [])
     return (
         <>
             <Table

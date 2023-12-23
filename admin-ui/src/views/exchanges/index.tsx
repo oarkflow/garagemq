@@ -2,7 +2,7 @@ import {Table} from "@/components/table";
 import {ColumnDef} from "@tanstack/table-core";
 import {effect} from "@preact/signals";
 import {HttpClient} from "@/helpers/api";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
 export const Exchanges = () => {
     const [exchanges, setExchanges] = useState([])
@@ -45,13 +45,13 @@ export const Exchanges = () => {
             accessorKey: "msg_rate_out",
         },
     ];
-    effect(() => {
+    useEffect(() => {
         HttpClient.get("/exchanges").then(response => {
             if(response.data.hasOwnProperty('items')) {
                 setExchanges(response.data.items)
             }
         })
-    })
+    }, [])
     return (
         <>
             <Table

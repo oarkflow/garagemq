@@ -17,6 +17,7 @@ type OverviewResponse struct {
 	ServerInfo server.ServerInfo `json:"server_info"`
 	Metrics    []*Metric         `json:"metrics"`
 	Counters   map[string]int    `json:"counters"`
+	Queues     *QueuesResponse   `json:"queues"`
 }
 
 type Metric struct {
@@ -33,6 +34,7 @@ func (h *OverviewHandler) Index(ctx context.Context, c *frame.Context) {
 	response := &OverviewResponse{
 		Counters:   make(map[string]int),
 		ServerInfo: h.amqpServer.GetInfo(),
+		Queues:     queueResponse(h.amqpServer),
 	}
 	h.populateMetrics(response)
 	h.populateCounters(response)

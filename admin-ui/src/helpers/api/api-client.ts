@@ -18,14 +18,17 @@ const axiosInstance = axios.create({
     },
 });
 const updateEndTime = (response) => {
-    response.customData = response.customData || {};
-    response.customData.time =
-        new Date().getTime() - response.config.customData.startTime;
+    if (response && response.hasOwnProperty('customData')) {
+        response.customData = response.customData || {};
+        response.customData.time =
+            new Date().getTime() - response.config.customData.startTime;
+    }
+
     return response;
 };
 axiosInstance.interceptors.request.use(
     (requestConfig) => {
-        requestConfig.customData = requestConfig.customData || {};
+        requestConfig.customData = requestConfig?.customData || {};
         requestConfig.customData.startTime = new Date().getTime();
         let time = ((Date.now() % 1000) / 1000) * 1000000;
         if (requestConfig.headers) {
@@ -124,7 +127,9 @@ export const HttpClient = {
                 return Promise.resolve(response);
             })
             .catch((error) => {
-                toast.error(error.message);
+                if (error) {
+                    toast.error(error.message);
+                }
                 return Promise.reject(error);
             });
     },

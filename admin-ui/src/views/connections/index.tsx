@@ -2,7 +2,7 @@ import {Table} from "@/components/table";
 import {ColumnDef} from "@tanstack/table-core";
 import {effect} from "@preact/signals";
 import {HttpClient} from "@/helpers/api";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
 export const Connections = () => {
     const [connections, setConnections] = useState([])
@@ -57,13 +57,13 @@ export const Connections = () => {
             accessorKey: "to",
         },
     ];
-    effect(() => {
+    useEffect(() => {
         HttpClient.get("/connections").then(response => {
             if(response.data.hasOwnProperty('items')) {
                 setConnections(response.data.items)
             }
         })
-    })
+    }, [])
     return (
         <>
             <Table

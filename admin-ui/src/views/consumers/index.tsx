@@ -2,7 +2,7 @@ import {Table} from "@/components/table";
 import {ColumnDef} from "@tanstack/table-core";
 import {effect} from "@preact/signals";
 import {HttpClient} from "@/helpers/api";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
 export const Consumers = () => {
     const [consumers, setConsumers] = useState([])
@@ -28,13 +28,13 @@ export const Consumers = () => {
             header: "Queue",
         },
     ];
-    effect(() => {
+    useEffect(() => {
         HttpClient.get("/consumers").then(response => {
             if(response.data.hasOwnProperty('items')) {
                 setConsumers(response.data.items)
             }
         })
-    })
+    }, [])
     return (
         <>
             <Table

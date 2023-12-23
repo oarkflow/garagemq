@@ -11,7 +11,14 @@ export const StackedAreaChart = ({series, height, colors, dataOptions}) => {
                 selection: function (chart, e) {
                     console.log(new Date(e.xaxis.min));
                 }
-            }
+            },
+            animations: {
+                enabled: true,
+                easing: 'linear',
+                dynamicAnimation: {
+                    speed: 500
+                }
+            },
         },
         colors: colors,
         dataLabels: {

@@ -2,9 +2,9 @@ import {Table} from "@/components/table";
 import {ColumnDef} from "@tanstack/table-core";
 import {effect} from "@preact/signals";
 import {HttpClient} from "@/helpers/api";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
-export const Queues = () => {
+export const Queues = ({data}) => {
     const [queues, setQueues] = useState([])
     const transformRate = (trackValue) => {
         if (!trackValue || !trackValue.value) {
@@ -70,13 +70,20 @@ export const Queues = () => {
             accessorKey: "ack",
         },
     ];
-    effect(() => {
-        HttpClient.get("/queues").then(response => {
-            if(response.data.hasOwnProperty('items')) {
-                setQueues(response.data.items)
-            }
-        })
-    })
+    useEffect(() => {
+        if (!data) {
+            HttpClient.get("/queues").then(response => {
+                if(response.data.hasOwnProperty('items')) {
+                    setQueues(response.data.items)
+                }
+            })
+        }
+    }, [])
+    useEffect(() => {
+        if (data) {
+            setQueues(data)
+        }
+    }, [data])
     return (
         <>
             <Table

@@ -33,8 +33,12 @@ func NewQueuesHandler(amqpServer *server.Server) *QueuesHandler {
 }
 
 func (h *QueuesHandler) Index(ctx context.Context, c *frame.Context) {
+	c.JSON(200, queueResponse(h.amqpServer))
+}
+
+func queueResponse(amqpServer *server.Server) *QueuesResponse {
 	response := &QueuesResponse{}
-	for vhostName, vhost := range h.amqpServer.GetVhosts() {
+	for vhostName, vhost := range amqpServer.GetVhosts() {
 		for _, queue := range vhost.GetQueues() {
 			ready := queue.GetMetrics().Ready.Track.GetLastTrackItem()
 			total := queue.GetMetrics().Total.Track.GetLastTrackItem()
@@ -74,6 +78,6 @@ func (h *QueuesHandler) Index(ctx context.Context, c *frame.Context) {
 			return response.Items[i].Name > response.Items[j].Name
 		},
 	)
+	return response
 
-	c.JSON(200, response)
 }

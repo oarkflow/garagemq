@@ -53,7 +53,10 @@ export const truncate = (text: string, len: number, suffix: string) => {
     }
 };
 
-export const humanFileSize = (bytes: number): `${number} ${'B' | 'KB' | 'MB' | 'GB' | 'TB'}` => {
+export const humanFileSize = (bytes: number): string => {
+    if (bytes === 0) {
+        return '0'
+    }
     const index = Math.floor(Math.log(bytes) / Math.log(1024));
     return `${Number((bytes / Math.pow(1024, index)).toFixed(2)) * 1} ${(['B', 'KB', 'MB', 'GB', 'TB'] as const)[index]}`;
 };
@@ -62,7 +65,9 @@ const ALPHABET = ['K', 'M', 'B', 'T']
 const TRESHOLD = 1e3
 
 export const humanNumber = (n) => {
-    let idx = 0
-    while (n >= TRESHOLD && ++idx <= ALPHABET.length) n /= TRESHOLD
-    return String(idx === 0 ? n : n + ALPHABET[idx - 1])
+    const formattedNumber = new Intl.NumberFormat('en-US', {
+        notation: 'compact',
+        compactDisplay: 'short',
+    });
+    return formattedNumber.format(n)
 }

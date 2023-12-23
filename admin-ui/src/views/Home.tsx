@@ -1,10 +1,12 @@
-import {StackedAreaChart} from '@/components/StackedAreaChart';
+import {StackedAreaChart} from '@/components/charts/StackedAreaChart';
 import {series} from '@/data/chart_data';
 import '@/styles/app.css';
 import {HttpClient} from "@/helpers/api";
-import {effect} from "@preact/signals";
+import {fromUnixTime, format} from 'date-fns'
 import {useEffect, useState} from "react";
 import {humanFileSize, humanNumber} from "@/helpers/string";
+import {Queues} from "@/views/queues";
+import {Example} from "@/components/charts/ExampleChart";
 
 interface ReportProps {
     title: string;
@@ -72,11 +74,11 @@ const TrafficCard = ({metrics}: ReportProps) => {
             <div className="flex gap-10 pt-2">
                 <div className="min-w-28">
                     <div>IN</div>
-                    <div className="text-3xl pt-1">{humanFileSize(metrics?.traffic_in.value || 0)}</div>
+                    <div className="text-3xl pt-1">{humanFileSize(metrics?.traffic_in?.value || 0)}</div>
                 </div>
                 <div className="min-w-28">
                     <div>Out</div>
-                    <div className="text-3xl pt-1">{humanFileSize(metrics?.traffic_out.value || 0)}</div>
+                    <div className="text-3xl pt-1">{humanFileSize(metrics?.traffic_out?.value || 0)}</div>
                 </div>
             </div>
         </div>
@@ -87,31 +89,72 @@ export const Home = () => {
     const [metrics, setMetrics] = useState({})
     const [counters, setCounters] = useState()
     const [serverInfo, setServerInfo] = useState()
+    const [queuedMessages, setQueuedMessages] = useState([])
+    const [queues, setQueues] = useState([])
+    const [messages, setMessages] = useState([])
+    const [traffic, setTraffic] = useState([])
     const updateMetrics = (data) => {
         let metricsData = data.metrics ? data.metrics : [];
         let mt = {}
+        let qs = {}
+        let ms = {}
+        let ts = {}
         metricsData.forEach((metric) => {
+            let name = metric.name.replaceAll('server.', '')
             if (metric.name === 'server.traffic_in' || metric.name === 'server.traffic_out') {
                 metric.sample = metric.sample.map((sample) => {
                     if (sample) {
-                        // convert to MB/s
                         sample.value = humanFileSize(sample.value) + "/s"
                     }
                     return sample
                 })
-                mt[metric.name.replaceAll('server.', '')] = {
+                mt[name] = {
                     sample: metric.sample,
                     value: metric.value,
                 }
-                return mt
+                if (['total', 'unacked', 'ready'].includes(name)) {
+                    qs[name] = {
+                        name: name,
+                        data: metric.sample.map((metric) => [format(fromUnixTime(metric.timestamp), 'MMM-d, h:M:s'), metric.value])
+                    }
+                } else if (['acknowledge', 'get', 'confirm', 'deliver', 'publish'].includes(name)) {
+                    ms[name] = {
+                        name: name,
+                        data: metric.sample.map((metric) => [format(fromUnixTime(metric.timestamp), 'MMM-d, h:M:s'), metric.value])
+                    }
+                } else if (['traffic_in', 'traffic_out'].includes(name)) {
+                    ts[name] = {
+                        name: name,
+                        data: metric.sample.map((metric) => [format(fromUnixTime(metric.timestamp), 'MMM-d, h:M:s'), metric.value])
+                    }
+                }
+
             } else {
-                mt[metric.name.replaceAll('server.', '')] = {
+                mt[name] = {
                     sample: metric.sample,
                     value: metric.value,
                 }
-                return mt
+                if (['total', 'unacked', 'ready'].includes(name)) {
+                    qs[name] = {
+                        name: name,
+                        data: metric.sample.map((metric) => [format(fromUnixTime(metric.timestamp), 'MMM-d, h:M:s'), metric.value])
+                    }
+                } else if (['acknowledge', 'get', 'confirm', 'deliver', 'publish'].includes(name)) {
+                    ms[name] = {
+                        name: name,
+                        data: metric.sample.map((metric) => [format(fromUnixTime(metric.timestamp), 'MMM-d, h:M:s'), metric.value])
+                    }
+                } else if (['traffic_in', 'traffic_out'].includes(name)) {
+                    ts[name] = {
+                        name: name,
+                        data: metric.sample.map((metric) => [format(fromUnixTime(metric.timestamp), 'MMM-d, h:M:s'), metric.value])
+                    }
+                }
             }
         })
+        setQueuedMessages(Object.values(qs))
+        setMessages(Object.values(ms))
+        setTraffic(Object.values(ts))
         setMetrics({server: mt})
     }
     const getOverview = () => {
@@ -122,7 +165,10 @@ export const Home = () => {
                 setCounters(response.data.counters)
                 setTimeout(() => {
                     getOverview()
-                }, 2000)
+                }, 500)
+            }
+            if(response.data.hasOwnProperty('queues')) {
+                setQueues(response.data.queues.items)
             }
         })
     }
@@ -139,105 +185,16 @@ export const Home = () => {
                 <MessagesCard metrics={metrics?.server} />
                 <TrafficCard metrics={metrics?.server} />
             </div>
-            <div className="grid lg:grid-cols-2 pt-10 gap-10">
-                <StackedAreaChart series={series} colors={['#008FFB', '#00E396', '#CED4DC']} dataOptions={{title: "Message Rate", xaxis:{type:"datetime"}, yaxis:{type:"number"}}} height={350}/>
-                <StackedAreaChart series={series} colors={['#008FFB', '#00E396', '#CED4DC']} dataOptions={{title: "Traffic Volume", xaxis:{type:"datetime"}, yaxis:{type:"number"}}} height={350}/>
+            <div className="grid lg:grid-cols-3 pt-10 gap-10">
+                <StackedAreaChart series={queuedMessages} colors={['#008FFB', '#00E396', '#CED4DC']} dataOptions={{title: "Queued Messages", xaxis:{type:"datetime"}, yaxis:{type:"number"}}} height={300}/>
+                <StackedAreaChart series={messages} dataOptions={{title: "Messages", xaxis:{type:"datetime"}, yaxis:{type:"number"}}} height={300}/>
+                <StackedAreaChart series={traffic} colors={['#008FFB', '#00E396']} dataOptions={{title: "Traffic Volume", xaxis:{type:"datetime"}, yaxis:{type:"number"}}} height={300}/>
+            </div>
+            <div className="w-100 h-80">
+                <Example/>
             </div>
             <div className="gap-10 pl-5">
-                <div>
-                    <h1 className="text-dark-gray py-5">Queues</h1>
-                    <div className="flex flex-col border rounded-md p-2">
-                        <div className="-m-1.5 overflow-x-auto">
-                            <div className="p-1.5 min-w-full inline-block align-middle">
-                                <div className="overflow-hidden">
-                                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                        <thead>
-                                            <tr>
-                                                <th scope="col"
-                                                    className="px-2 py-2 text-start text-xs font-medium text-gray-600 uppercase">
-                                                    Name
-                                                </th>
-                                                <th scope="col"
-                                                    className="px-2 py-2 text-start text-xs font-medium text-gray-600 uppercase">
-                                                    Status
-                                                </th>
-                                                <th scope="col"
-                                                    className="px-2 py-2 text-start text-xs font-medium text-gray-600 uppercase">
-                                                    Ready
-                                                </th>
-                                                <th scope="col"
-                                                    className="px-2 py-2 text-start text-xs font-medium text-gray-600 uppercase">
-                                                    Unacked
-                                                </th>
-                                                <th scope="col"
-                                                    className="px-2 py-2 text-start text-xs font-medium text-gray-600 uppercase">
-                                                    Persistent
-                                                </th>
-                                                <th scope="col"
-                                                    className="px-2 py-2 text-start text-xs font-medium text-gray-600 uppercase">
-                                                    Total
-                                                </th>
-                                                <th scope="col"
-                                                    className="px-2 py-2 text-start text-xs font-medium text-gray-600 uppercase">
-                                                    Incoming
-                                                </th>
-                                                <th scope="col"
-                                                    className="px-2 py-2 text-start text-xs font-medium text-gray-600 uppercase">
-                                                    Deliver
-                                                </th>
-                                                <th scope="col"
-                                                    className="px-2 py-2 text-start text-xs font-medium text-gray-600 uppercase">
-                                                    Ack
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                                            <tr>
-                                                <td className="px-2 py-1 whitespace-nowrap text-sm font-medium text-gray-500 dark:text-gray-200">
-                                                    <div>routee-provider</div>
-                                                </td>
-                                                <td className="px-2 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-200">running</td>
-                                                <td className="px-2 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-200">0</td>
-                                                <td className="px-2 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-200">0</td>
-                                                <td className="px-2 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-200">0</td>
-                                                <td className="px-2 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-200">0</td>
-                                                <td className="px-2 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-200">0/s</td>
-                                                <td className="px-2 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-200">0/s</td>
-                                                <td className="px-2 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-200">0/s</td>
-                                            </tr>
-                                            <tr>
-                                                <td className="px-2 py-1 whitespace-nowrap text-sm font-medium text-gray-500 dark:text-gray-200">
-                                                    <div>smsto-provider</div>
-                                                </td>
-                                                <td className="px-2 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-200">running</td>
-                                                <td className="px-2 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-200">0</td>
-                                                <td className="px-2 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-200">0</td>
-                                                <td className="px-2 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-200">0</td>
-                                                <td className="px-2 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-200">0</td>
-                                                <td className="px-2 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-200">0/s</td>
-                                                <td className="px-2 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-200">0/s</td>
-                                                <td className="px-2 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-200">0/s</td>
-                                            </tr>
-                                            <tr>
-                                                <td className="px-2 py-1 whitespace-nowrap text-sm font-medium text-gray-500 dark:text-gray-200">
-                                                    <div>messagebird-provider</div>
-                                                </td>
-                                                <td className="px-2 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-200">running</td>
-                                                <td className="px-2 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-200">0</td>
-                                                <td className="px-2 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-200">0</td>
-                                                <td className="px-2 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-200">0</td>
-                                                <td className="px-2 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-200">0</td>
-                                                <td className="px-2 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-200">0/s</td>
-                                                <td className="px-2 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-200">0/s</td>
-                                                <td className="px-2 py-1 whitespace-nowrap text-sm text-gray-500 dark:text-gray-200">0/s</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <Queues data={queues}/>
             </div>
         </div>
     );
