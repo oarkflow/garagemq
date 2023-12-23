@@ -96,9 +96,9 @@ export const Home = () => {
     const updateMetrics = (data) => {
         let metricsData = data.metrics ? data.metrics : [];
         let mt = {}
-        let qs = {}
-        let ms = {}
-        let ts = {}
+        let qs = []
+        let ms = []
+        let ts = []
         metricsData.forEach((metric) => {
             let name = metric.name.replaceAll('server.', '')
             if (metric.name === 'server.traffic_in' || metric.name === 'server.traffic_out') {
@@ -108,53 +108,69 @@ export const Home = () => {
                     }
                     return sample
                 })
-                mt[name] = {
-                    sample: metric.sample,
-                    value: metric.value,
-                }
-                if (['total', 'unacked', 'ready'].includes(name)) {
-                    qs[name] = {
-                        name: name,
-                        data: metric.sample.map((metric) => [format(fromUnixTime(metric.timestamp), 'MMM-d, h:M:s'), metric.value])
-                    }
-                } else if (['acknowledge', 'get', 'confirm', 'deliver', 'publish'].includes(name)) {
-                    ms[name] = {
-                        name: name,
-                        data: metric.sample.map((metric) => [format(fromUnixTime(metric.timestamp), 'MMM-d, h:M:s'), metric.value])
-                    }
-                } else if (['traffic_in', 'traffic_out'].includes(name)) {
-                    ts[name] = {
-                        name: name,
-                        data: metric.sample.map((metric) => [format(fromUnixTime(metric.timestamp), 'MMM-d, h:M:s'), metric.value])
-                    }
-                }
-
-            } else {
-                mt[name] = {
-                    sample: metric.sample,
-                    value: metric.value,
-                }
-                if (['total', 'unacked', 'ready'].includes(name)) {
-                    qs[name] = {
-                        name: name,
-                        data: metric.sample.map((metric) => [format(fromUnixTime(metric.timestamp), 'MMM-d, h:M:s'), metric.value])
-                    }
-                } else if (['acknowledge', 'get', 'confirm', 'deliver', 'publish'].includes(name)) {
-                    ms[name] = {
-                        name: name,
-                        data: metric.sample.map((metric) => [format(fromUnixTime(metric.timestamp), 'MMM-d, h:M:s'), metric.value])
-                    }
-                } else if (['traffic_in', 'traffic_out'].includes(name)) {
-                    ts[name] = {
-                        name: name,
-                        data: metric.sample.map((metric) => [format(fromUnixTime(metric.timestamp), 'MMM-d, h:M:s'), metric.value])
-                    }
-                }
             }
+            mt[name] = {
+                sample: metric.sample,
+                value: metric.value,
+            }
+            // format(fromUnixTime(metric.timestamp), 'MMM-d, h:M:s')
+            if (['total', 'unacked', 'ready'].includes(name)) {
+                qs = [...qs, ...metric.sample.map((sample) => {
+                    return {
+                        name: name,
+                        value: sample.value,
+                        timestamp: sample.timestamp
+                    }
+                })]
+            } else if (['acknowledge', 'get', 'confirm', 'deliver', 'publish'].includes(name)) {
+                ms = [...ms, ...metric.sample.map((sample) => {
+                    return {
+                        name: name,
+                        value: sample.value,
+                        timestamp: sample.timestamp
+                    }
+                })]
+            } else if (['traffic_in', 'traffic_out'].includes(name)) {
+                ts = [...ts, ...metric.sample.map((sample) => {
+                    return {
+                        name: name,
+                        value: sample.value,
+                        timestamp: sample.timestamp
+                    }
+                })]
+            }
+
         })
-        setQueuedMessages(Object.values(qs))
-        setMessages(Object.values(ms))
-        setTraffic(Object.values(ts))
+        const msg = Object.groupBy(ms, product => product.timestamp)
+        const qsg = Object.groupBy(qs, product => product.timestamp)
+        const tsg = Object.groupBy(ts, product => product.timestamp)
+        let msa = []
+        let qsa = []
+        let tsa = []
+        for (const key in msg) {
+            let tmp = {name: format(fromUnixTime(key), 'hh:MM:ss')}
+            msg[key].forEach(d => {
+                tmp[d.name] = d.value
+            })
+           msa.push(tmp)
+        }
+        for (const key in qsg) {
+            let tmp = {name: format(fromUnixTime(key), 'hh:MM:ss')}
+            qsg[key].forEach(d => {
+                tmp[d.name] = d.value
+            })
+           qsa.push(tmp)
+        }
+        for (const key in tsg) {
+            let tmp = {name: format(fromUnixTime(key), 'hh:MM:ss')}
+            tsg[key].forEach(d => {
+                tmp[d.name] = d.value
+            })
+           tsa.push(tmp)
+        }
+        setQueuedMessages(qsa)
+        setMessages(msa)
+        setTraffic(tsa)
         setMetrics({server: mt})
     }
     const getOverview = () => {
@@ -165,7 +181,7 @@ export const Home = () => {
                 setCounters(response.data.counters)
                 setTimeout(() => {
                     getOverview()
-                }, 500)
+                }, 100)
             }
             if(response.data.hasOwnProperty('queues')) {
                 setQueues(response.data.queues.items)
@@ -186,9 +202,24 @@ export const Home = () => {
                 <TrafficCard metrics={metrics?.server} />
             </div>
             <div className="grid lg:grid-cols-3 pt-10 gap-10">
-                <StackedAreaChart series={queuedMessages} colors={['#008FFB', '#00E396', '#CED4DC']} dataOptions={{title: "Queued Messages", xaxis:{type:"datetime"}, yaxis:{type:"number"}}} height={300}/>
-                <StackedAreaChart series={messages} dataOptions={{title: "Messages", xaxis:{type:"datetime"}, yaxis:{type:"number"}}} height={300}/>
-                <StackedAreaChart series={traffic} colors={['#008FFB', '#00E396']} dataOptions={{title: "Traffic Volume", xaxis:{type:"datetime"}, yaxis:{type:"number"}}} height={300}/>
+                <div>
+                    <h1>Queued Messages</h1>
+                    <div className="h-80">
+                        <StackedAreaChart series={queuedMessages} options={{xaxis: {field: "name"}, fields: [{name: "total", color: "#00E396"}, {name: "ready", color: "#008FFB"}, {name: "unacked", color: "#CED4DC"},]}}/>
+                    </div>
+                </div>
+                <div>
+                    <h1>Message Rate</h1>
+                    <div className="h-80">
+                        <StackedAreaChart series={messages} options={{xaxis: {field: "name"}, fields: [{name: "publish", color: "#00E396"}, {name: "acknowledge", color: "#F0E396"}, {name: "deliver", color: "#DAA396"}, {name: "confirm", color: "#008FFB"}, {name: "get", color: "#CED4DC"},]}}/>
+                    </div>
+                </div>
+                <div>
+                    <h1>Traffic Rate</h1>
+                    <div className="h-80">
+                        <StackedAreaChart series={traffic} options={{xaxis: {field: "name"}, fields: [{name: "traffic_in", color: "#00E396"}, {name: "traffic_out", color: "#F0E396"}]}}/>
+                    </div>
+                </div>
             </div>
             <div className="gap-10 pl-5">
                 <Queues data={queues}/>

@@ -1,56 +1,20 @@
 import React from 'react';
-import ReactApexChart from 'react-apexcharts';
+import {ComposedChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend} from 'recharts';
 
-export const StackedAreaChart = ({series, height, colors, dataOptions}) => {
-    let options = {
-        chart: {
-            type: 'area',
-            height: height,
-            stacked: true,
-            events: {
-                selection: function (chart, e) {
-                    console.log(new Date(e.xaxis.min));
-                }
-            },
-            animations: {
-                enabled: true,
-                easing: 'linear',
-                dynamicAnimation: {
-                    speed: 500
-                }
-            },
-        },
-        colors: colors,
-        dataLabels: {
-            enabled: false
-        },
-        stroke: {
-            curve: 'smooth'
-        },
-        fill: {
-            type: 'gradient',
-            gradient: {
-                opacityFrom: 0.6,
-                opacityTo: 0.8
-            }
-        },
-        legend: {
-            position: 'top',
-            horizontalAlign: 'left'
-        }
-    };
-    if (dataOptions.hasOwnProperty('title')) {
-        options.title = {text: dataOptions.title}
-    }
-    if (dataOptions.hasOwnProperty('xaxis')) {
-        options.xaxis = dataOptions.xaxis
-    }
-    if (dataOptions.hasOwnProperty('yaxis')) {
-        options.yaxis = dataOptions.yaxis
-    }
+export const StackedAreaChart = ({title, series, options}) => {
+
     return (
-        <div>
-            <ReactApexChart options={options} series={series} type="area" height={height}/>
-        </div>
+        <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart width={500} data={series}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey={options.xaxis.field} />
+                <YAxis interval="preserveStart" />
+                <Tooltip />
+                <Legend align="left" verticalAlign="top"/>
+                {options.fields.map((field, i) => {
+                    return <Area animationEasing="linear" key={i} stroke={field.color} fill={field.color} stackId="1" type="monotone" dataKey={field.name} />
+                })}
+            </ComposedChart>
+        </ResponsiveContainer>
     );
-};
+}
