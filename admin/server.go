@@ -35,6 +35,7 @@ func NewServer(amqpServer *server.Server, host string, port string) *Server {
 	srv.GET("/overview", overviewHandler.Index)
 	srv.GET("/exchanges", exchangeHandler.Index)
 	srv.GET("/queues", queuesHandler.Index)
+	srv.GET("/queues/:queue/consumers", queuesHandler.Consumers)
 	srv.GET("/socket", func(c context.Context, ctx *frame.Context) {
 		websocketServer.Handle(ctx)
 	})
@@ -42,7 +43,12 @@ func NewServer(amqpServer *server.Server, host string, port string) *Server {
 	srv.GET("/channels", channelsHandler.Index)
 	srv.GET("/consumers", consumerHandler.Index)
 	srv.POST("/consumer/start", consumerHandler.Resume)
-	srv.POST("/consumer/stop", consumerHandler.Pause)
+	srv.POST("/consumer/pause", consumerHandler.Pause)
+	srv.POST("/consumer/stop", consumerHandler.Stop)
+	srv.POST("/consumer/cancel", consumerHandler.Cancel)
+	srv.POST("/queue/start", queuesHandler.Start)
+	srv.POST("/queue/pause", queuesHandler.Pause)
+	srv.POST("/queue/stop", queuesHandler.Stop)
 	srv.GET("/bindings", bindHandler.Index)
 	adminServer := &Server{f: srv}
 	return adminServer

@@ -34,8 +34,13 @@ func NewConnectionsHandler(amqpServer *server.Server) *ConnectionsHandler {
 }
 
 func (h *ConnectionsHandler) Index(ctx context.Context, c *frame.Context) {
+	response := connectionResponse(h.amqpServer)
+	c.JSON(200, response)
+}
+
+func connectionResponse(amqpServer *server.Server) *ConnectionsResponse {
 	response := &ConnectionsResponse{}
-	for _, conn := range h.amqpServer.GetConnections() {
+	for _, conn := range amqpServer.GetConnections() {
 		response.Items = append(
 			response.Items,
 			&Connection{
@@ -44,7 +49,7 @@ func (h *ConnectionsHandler) Index(ctx context.Context, c *frame.Context) {
 				Addr:          conn.GetRemoteAddr().String(),
 				ChannelsCount: len(conn.GetChannels()),
 				User:          conn.GetUsername(),
-				Protocol:      h.amqpServer.GetProtoVersion(),
+				Protocol:      amqpServer.GetProtoVersion(),
 				FromClient:    conn.GetMetrics().TrafficIn.Track.GetLastDiffTrackItem(),
 				ToClient:      conn.GetMetrics().TrafficOut.Track.GetLastDiffTrackItem(),
 			},
@@ -57,7 +62,7 @@ func (h *ConnectionsHandler) Index(ctx context.Context, c *frame.Context) {
 			return response.Items[i].ID > response.Items[j].ID
 		},
 	)
-	c.JSON(200, response)
+	return response
 }
 
 func (h *ConnectionsHandler) Close(ctx context.Context, c *frame.Context) {

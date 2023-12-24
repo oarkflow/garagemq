@@ -36,8 +36,13 @@ func NewChannelsHandler(amqpServer *server.Server) *ChannelsHandler {
 }
 
 func (h *ChannelsHandler) Index(ctx context.Context, c *frame.Context) {
+	response := channelResponse(h.amqpServer)
+	c.JSON(200, response)
+}
+
+func channelResponse(amqpServer *server.Server) *ChannelsResponse {
 	response := &ChannelsResponse{}
-	for _, conn := range h.amqpServer.GetConnections() {
+	for _, conn := range amqpServer.GetConnections() {
 		for chID, ch := range conn.GetChannels() {
 			publish := ch.GetMetrics().Publish.Track.GetLastDiffTrackItem()
 			confirm := ch.GetMetrics().Confirm.Track.GetLastDiffTrackItem()
@@ -78,7 +83,7 @@ func (h *ChannelsHandler) Index(ctx context.Context, c *frame.Context) {
 			}
 		},
 	)
-	c.JSON(200, response)
+	return response
 }
 
 type ChannelRequest struct {

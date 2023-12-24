@@ -11,6 +11,10 @@ export const WorkerProvider = ({ children, defaultWorker }) => {
     const [serverInfo, setServerInfo] = useState()
     const [queuedMessages, setQueuedMessages] = useState([])
     const [queues, setQueues] = useState([])
+    const [connections, setConnections] = useState([])
+    const [exchanges, setExchanges] = useState([])
+    const [consumers, setConsumers] = useState([])
+    const [channels, setChannels] = useState([])
     const [messages, setMessages] = useState([])
     const [traffic, setTraffic] = useState([])
 
@@ -39,24 +43,24 @@ export const WorkerProvider = ({ children, defaultWorker }) => {
                 qs = [...qs, ...metric.sample.map((sample) => {
                     return {
                         name: name,
-                        value: sample.value,
-                        timestamp: sample.timestamp
+                        value: sample?.value,
+                        timestamp: sample?.timestamp
                     }
                 })]
             } else if (['acknowledge', 'get', 'confirm', 'deliver', 'publish'].includes(name)) {
                 ms = [...ms, ...metric.sample.map((sample) => {
                     return {
                         name: name,
-                        value: sample.value,
-                        timestamp: sample.timestamp
+                        value: sample?.value,
+                        timestamp: sample?.timestamp
                     }
                 })]
             } else if (['traffic_in', 'traffic_out'].includes(name)) {
                 ts = [...ts, ...metric.sample.map((sample) => {
                     return {
                         name: name,
-                        value: sample.value,
-                        timestamp: sample.timestamp
+                        value: sample?.value,
+                        timestamp: sample?.timestamp
                     }
                 })]
             }
@@ -105,7 +109,19 @@ export const WorkerProvider = ({ children, defaultWorker }) => {
             setCounters(data.counters)
         }
         if(data.hasOwnProperty('queues')) {
-            setQueues(data.queues.items)
+            setQueues(data.queues?.items || [])
+        }
+        if(data.hasOwnProperty('connections')) {
+            setConnections(data.connections?.items || [])
+        }
+        if(data.hasOwnProperty('channels')) {
+            setChannels(data.channels?.items || [])
+        }
+        if(data.hasOwnProperty('consumers')) {
+            setConsumers(data.consumers?.items || [])
+        }
+        if(data.hasOwnProperty('exchanges')) {
+            setExchanges(data.exchanges?.items || [])
         }
     }
     const getOverview = () => {
@@ -121,9 +137,18 @@ export const WorkerProvider = ({ children, defaultWorker }) => {
         queues,
         messages,
         traffic,
+        consumers,
+        channels,
+        connections,
+        exchanges,
         updateMetrics,
         getOverview,
-        updateOverview
+        updateOverview,
+        setQueues,
+        setConnections,
+        setConsumers,
+        setExchanges,
+        setChannels
     }
     return <WorkerContext.Provider value={value}>{children}</WorkerContext.Provider>
 };

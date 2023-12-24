@@ -14,6 +14,7 @@ type Consumer struct {
 	ID        uint64 `json:"id"`
 	ChannelID uint16 `json:"channel_id"`
 	Channel   string `json:"channel"`
+	Active    bool   `json:"active"`
 	Tag       string `json:"tag"`
 	Queue     string `json:"queue"`
 }
@@ -33,14 +34,20 @@ func NewConsumerHandler(amqpServer *server.Server) *ConsumerHandler {
 }
 
 func (h *ConsumerHandler) Index(ctx context.Context, c *frame.Context) {
-	var response ConsumerResponse
-	for _, con := range h.amqpServer.GetConnections() {
+	response := consumerResponse(h.amqpServer)
+	c.JSON(200, response)
+}
+
+func consumerResponse(amqpServer *server.Server) *ConsumerResponse {
+	response := &ConsumerResponse{}
+	for _, con := range amqpServer.GetConnections() {
 		for chID, ch := range con.GetChannels() {
 			for _, consumer := range ch.Consumers() {
 				response.Items = append(response.Items, Consumer{
 					ID:        consumer.ID,
 					Tag:       consumer.ConsumerTag,
 					Queue:     consumer.Queue,
+					Active:    consumer.Active(),
 					ChannelID: chID,
 					Channel:   fmt.Sprintf("%s (%d)", con.GetRemoteAddr().String(), chID),
 				})
@@ -53,7 +60,7 @@ func (h *ConsumerHandler) Index(ctx context.Context, c *frame.Context) {
 			return response.Items[i].ID > response.Items[j].ID
 		},
 	)
-	c.JSON(200, response)
+	return response
 }
 
 func (h *ConsumerHandler) Pause(ctx context.Context, c *frame.Context) {
@@ -88,6 +95,25 @@ func (h *ConsumerHandler) Resume(ctx context.Context, c *frame.Context) {
 				if consumer.ConsumerTag == consumers.Tag {
 					consumer.Start()
 					c.JSON(200, "Consumer Started")
+				}
+			}
+		}
+	}
+}
+
+func (h *ConsumerHandler) Stop(ctx context.Context, c *frame.Context) {
+	var consumers Consumer
+	err := c.Bind(&consumers)
+	if err != nil {
+		c.JSON(500, err.Error())
+		return
+	}
+	for _, con := range h.amqpServer.GetConnections() {
+		for _, ch := range con.GetChannels() {
+			for _, consumer := range ch.Consumers() {
+				if consumer.ConsumerTag == consumers.Tag {
+					consumer.Stop()
+					c.JSON(200, "Consumer Stopped")
 				}
 			}
 		}

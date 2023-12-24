@@ -36,34 +36,30 @@ type MetricsState struct {
 // Queue is an implementation of the AMQP-queue entity
 type Queue struct {
 	safequeue.SafeQueue
-	name        string
-	connID      uint64
-	exclusive   bool
-	autoDelete  bool
-	durable     bool
-	cmrLock     deadlock.RWMutex
-	consumers   []interfaces.Consumer
-	consumeExcl bool
-	call        chan struct{}
-	wasConsumed bool
-	shardSize   int
-	actLock     deadlock.RWMutex
-	active      bool
-	// persistent storage
-	msgPStorage interfaces.MsgStorage
-	// transient storage
-	msgTStorage     interfaces.MsgStorage
-	currentConsumer int
-	metrics         *MetricsState
-	autoDeleteQueue chan string
-	queueLength     int64
-
-	// lock for sync load swapped-messages from disk
-	loadSwapLock           sync.Mutex
+	name                   string
+	connID                 uint64
+	exclusive              bool
+	autoDelete             bool
+	durable                bool
+	cmrLock                deadlock.RWMutex
+	consumers              []interfaces.Consumer
+	consumeExcl            bool
+	call                   chan struct{}
+	wasConsumed            bool
+	shardSize              int
+	actLock                deadlock.RWMutex
+	active                 bool
+	msgPStorage            interfaces.MsgStorage // persistent storage
+	msgTStorage            interfaces.MsgStorage // transient storage
+	currentConsumer        int
+	metrics                *MetricsState
+	autoDeleteQueue        chan string
+	queueLength            int64
+	loadSwapLock           sync.Mutex // lock for sync load swapped-messages from disk
 	maxMessagesInRAM       uint64
 	lastStoredMsgID        uint64
 	lastMemMsgID           uint64
-	swappedToDisk          bool
+	swappedToDisk          bool ``
 	maybeLoadFromStorageCh chan struct{}
 	wg                     *sync.WaitGroup
 }
@@ -112,11 +108,11 @@ func NewQueue(name string, connID uint64, exclusive bool, autoDelete bool, durab
 func (queue *Queue) Start() error {
 	queue.actLock.Lock()
 	defer queue.actLock.Unlock()
-
 	if queue.active {
 		return nil
 	}
-
+	queue.call = make(chan struct{}, 1)
+	queue.maybeLoadFromStorageCh = make(chan struct{}, 1)
 	queue.active = true
 	queue.wg.Add(1)
 	go func() {
@@ -154,6 +150,9 @@ func (queue *Queue) Start() error {
 // Stop stops main queue loop
 // After stop no one can send or receive messages from queue
 func (queue *Queue) Stop() error {
+	if !queue.active {
+		return nil
+	}
 	queue.actLock.Lock()
 	defer queue.actLock.Unlock()
 
@@ -161,6 +160,18 @@ func (queue *Queue) Stop() error {
 	close(queue.maybeLoadFromStorageCh)
 	close(queue.call)
 	queue.wg.Wait()
+	return nil
+}
+
+// Pause stops main queue loop
+// After stop no one can send or receive messages from queue
+func (queue *Queue) Pause() error {
+	if !queue.active {
+		return nil
+	}
+	queue.actLock.Lock()
+	defer queue.actLock.Unlock()
+	queue.active = false
 	return nil
 }
 

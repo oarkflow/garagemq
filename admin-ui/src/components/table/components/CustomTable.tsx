@@ -203,7 +203,7 @@ export function CustomTable<T extends RowData>({
                     )
                 })}
                 {table.getRowModel().rows && table.getRowModel().rows.length === 0 && (
-                    <tr className="relative h-100">
+                    <tr className="relative h-100 no-records-row">
                         <td colSpan={table.getAllColumns().length} className="py-4 relative">
                             {table.options.isPending && <Loading />}
                             {!table.options.isPending && (

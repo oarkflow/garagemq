@@ -3,9 +3,10 @@ import {ColumnDef} from "@tanstack/table-core";
 import {effect} from "@preact/signals";
 import {HttpClient} from "@/helpers/api";
 import {useEffect, useState} from "react";
+import {useWorker} from "@/hooks/worker";
 
 export const Connections = () => {
-    const [connections, setConnections] = useState([])
+    const {connections, setConnections} = useWorker()
     const transformTraffic = (trackValue) => {
         let value = 0;
         if (trackValue) {
@@ -60,7 +61,7 @@ export const Connections = () => {
     useEffect(() => {
         HttpClient.get("/connections").then(response => {
             if(response.data.hasOwnProperty('items')) {
-                setConnections(response.data.items)
+                setConnections(response.data.items || [])
             }
         })
     }, [])

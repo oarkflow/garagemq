@@ -15,10 +15,14 @@ type OverviewHandler struct {
 }
 
 type OverviewResponse struct {
-	ServerInfo server.ServerInfo `json:"server_info"`
-	Metrics    []*Metric         `json:"metrics"`
-	Counters   map[string]int    `json:"counters"`
-	Queues     *QueuesResponse   `json:"queues"`
+	ServerInfo  server.ServerInfo    `json:"server_info"`
+	Metrics     []*Metric            `json:"metrics"`
+	Counters    map[string]int       `json:"counters"`
+	Connections *ConnectionsResponse `json:"connections"`
+	Channels    *ChannelsResponse    `json:"channels"`
+	Exchanges   *ExchangesResponse   `json:"exchanges"`
+	Queues      *QueuesResponse      `json:"queues"`
+	Consumers   *ConsumerResponse    `json:"consumers"`
 }
 
 type Metric struct {
@@ -46,9 +50,13 @@ func (h *OverviewHandler) Index(ctx context.Context, c *frame.Context) {
 
 func (h *OverviewHandler) getOverview() *OverviewResponse {
 	response := &OverviewResponse{
-		Counters:   make(map[string]int),
-		ServerInfo: h.amqpServer.GetInfo(),
-		Queues:     queueResponse(h.amqpServer),
+		Counters:    make(map[string]int),
+		ServerInfo:  h.amqpServer.GetInfo(),
+		Queues:      queueResponse(h.amqpServer),
+		Connections: connectionResponse(h.amqpServer),
+		Exchanges:   exchangeResponse(h.amqpServer),
+		Consumers:   consumerResponse(h.amqpServer),
+		Channels:    channelResponse(h.amqpServer),
 	}
 	h.populateMetrics(response)
 	h.populateCounters(response)

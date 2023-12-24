@@ -59,6 +59,7 @@ func generateTag(id uint64) string {
 // Start starting consumer to fetch messages from queue
 func (consumer *Consumer) Start() {
 	consumer.status = started
+	consumer.consume = make(chan struct{}, 1)
 	go consumer.startConsume()
 	consumer.Consume()
 }
@@ -168,13 +169,13 @@ func (consumer *Consumer) Stop() {
 	}
 	consumer.status = stopped
 	consumer.statusLock.Unlock()
-	consumer.queue.RemoveConsumer(consumer.ConsumerTag)
 	close(consumer.consume)
 }
 
 // Cancel stops consumer and send basic.cancel method to the client
 func (consumer *Consumer) Cancel() {
 	consumer.Stop()
+	consumer.queue.RemoveConsumer(consumer.ConsumerTag)
 	consumer.channel.SendMethod(&amqp.BasicCancel{ConsumerTag: consumer.ConsumerTag, NoWait: true})
 }
 
@@ -186,4 +187,12 @@ func (consumer *Consumer) Tag() string {
 // Qos returns consumer qos rules
 func (consumer *Consumer) Qos() []*qos.AmqpQos {
 	return consumer.qos
+}
+
+// Active returns consumer qos rules
+func (consumer *Consumer) Active() bool {
+	if consumer.status == started {
+		return true
+	}
+	return false
 }

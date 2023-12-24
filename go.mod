@@ -5,7 +5,9 @@ go 1.21.0
 require (
 	github.com/dgraph-io/badger v1.6.2
 	github.com/oarkflow/frame v0.0.56
+	github.com/oarkflow/log v1.0.74
 	github.com/oarkflow/pkg v0.0.99
+	github.com/oarkflow/sio v0.0.4
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.18.2
@@ -32,8 +34,6 @@ require (
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/nyaruka/phonenumbers v1.3.0 // indirect
-	github.com/oarkflow/log v1.0.74 // indirect
-	github.com/oarkflow/sio v0.0.4 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect

@@ -3,9 +3,10 @@ import {ColumnDef} from "@tanstack/table-core";
 import {effect} from "@preact/signals";
 import {HttpClient} from "@/helpers/api";
 import {useEffect, useState} from "react";
+import {useWorker} from "@/hooks/worker";
 
 export const Exchanges = () => {
-    const [exchanges, setExchanges] = useState([])
+    const {exchanges, setExchanges} = useWorker()
     const transformRate = (trackValue) => {
         if (!trackValue || !trackValue.value) {
             return '0/s'
@@ -48,7 +49,7 @@ export const Exchanges = () => {
     useEffect(() => {
         HttpClient.get("/exchanges").then(response => {
             if(response.data.hasOwnProperty('items')) {
-                setExchanges(response.data.items)
+                setExchanges(response.data.items || [])
             }
         })
     }, [])

@@ -34,9 +34,13 @@ func NewExchangesHandler(amqpServer *server.Server) *ExchangesHandler {
 }
 
 func (h *ExchangesHandler) Index(ctx context.Context, c *frame.Context) {
-	response := &ExchangesResponse{}
+	response := exchangeResponse(h.amqpServer)
+	c.JSON(200, response)
+}
 
-	for vhostName, vhost := range h.amqpServer.GetVhosts() {
+func exchangeResponse(amqpServer *server.Server) *ExchangesResponse {
+	response := &ExchangesResponse{}
+	for vhostName, vhost := range amqpServer.GetVhosts() {
 		for _, exchange := range vhost.GetExchanges() {
 			name := exchange.GetName()
 			if name == "" {
@@ -59,7 +63,7 @@ func (h *ExchangesHandler) Index(ctx context.Context, c *frame.Context) {
 	}
 
 	sort.Slice(response.Items, func(i, j int) bool { return response.Items[i].Name < response.Items[j].Name })
-	c.JSON(200, response)
+	return response
 }
 
 type ExQueueRequest struct {
