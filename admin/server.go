@@ -1,9 +1,11 @@
 package admin
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
+	"github.com/oarkflow/frame"
 	"github.com/oarkflow/frame/middlewares/server/cors"
 
 	"github.com/oarkflow/garagemq/server"
@@ -20,6 +22,7 @@ func NewServer(amqpServer *server.Server, host string, port string) *Server {
 	url := fmt.Sprintf("%s:%s", host, port)
 	srv := frameServer.Default(frameServer.WithHostPorts(url))
 	srv.Use(cors.Default())
+	NewWebsocket()
 	consumerHandler := NewConsumerHandler(amqpServer)
 	bindHandler := NewBindingsHandler(amqpServer)
 	overviewHandler := NewOverviewHandler(amqpServer)
@@ -32,6 +35,9 @@ func NewServer(amqpServer *server.Server, host string, port string) *Server {
 	srv.GET("/overview", overviewHandler.Index)
 	srv.GET("/exchanges", exchangeHandler.Index)
 	srv.GET("/queues", queuesHandler.Index)
+	srv.GET("/socket", func(c context.Context, ctx *frame.Context) {
+		websocketServer.Handle(ctx)
+	})
 	srv.GET("/connections", connectionHandler.Index)
 	srv.GET("/channels", channelsHandler.Index)
 	srv.GET("/consumers", consumerHandler.Index)

@@ -1,12 +1,10 @@
 import {StackedAreaChart} from '@/components/charts/StackedAreaChart';
-import {series} from '@/data/chart_data';
 import '@/styles/app.css';
-import {HttpClient} from "@/helpers/api";
-import {fromUnixTime, format} from 'date-fns'
-import {useEffect, useState} from "react";
+import {useEffect} from "react";
 import {humanFileSize, humanNumber} from "@/helpers/string";
 import {Queues} from "@/views/queues";
-import {Example} from "@/components/charts/ExampleChart";
+import {useWorker} from "@/hooks/worker";
+import {useSocket} from "@/hooks/websocket";
 
 interface ReportProps {
     title: string;
@@ -86,111 +84,19 @@ const TrafficCard = ({metrics}: ReportProps) => {
 };
 
 export const Home = () => {
-    const [metrics, setMetrics] = useState({})
-    const [counters, setCounters] = useState()
-    const [serverInfo, setServerInfo] = useState()
-    const [queuedMessages, setQueuedMessages] = useState([])
-    const [queues, setQueues] = useState([])
-    const [messages, setMessages] = useState([])
-    const [traffic, setTraffic] = useState([])
-    const updateMetrics = (data) => {
-        let metricsData = data.metrics ? data.metrics : [];
-        let mt = {}
-        let qs = []
-        let ms = []
-        let ts = []
-        metricsData.forEach((metric) => {
-            let name = metric.name.replaceAll('server.', '')
-            /*if (metric.name === 'server.traffic_in' || metric.name === 'server.traffic_out') {
-                metric.sample = metric.sample.map((sample) => {
-                    if (sample) {
-                        sample.value = humanFileSize(sample.value) + "/s"
-                    }
-                    return sample
-                })
-            }*/
-            mt[name] = {
-                sample: metric.sample,
-                value: metric.value,
-            }
-            // format(fromUnixTime(metric.timestamp), 'MMM-d, h:M:s')
-            if (['total', 'unacked', 'ready'].includes(name)) {
-                qs = [...qs, ...metric.sample.map((sample) => {
-                    return {
-                        name: name,
-                        value: sample.value,
-                        timestamp: sample.timestamp
-                    }
-                })]
-            } else if (['acknowledge', 'get', 'confirm', 'deliver', 'publish'].includes(name)) {
-                ms = [...ms, ...metric.sample.map((sample) => {
-                    return {
-                        name: name,
-                        value: sample.value,
-                        timestamp: sample.timestamp
-                    }
-                })]
-            } else if (['traffic_in', 'traffic_out'].includes(name)) {
-                ts = [...ts, ...metric.sample.map((sample) => {
-                    return {
-                        name: name,
-                        value: sample.value,
-                        timestamp: sample.timestamp
-                    }
-                })]
-            }
+    const {metrics, queuedMessages, messages, traffic, queues, serverInfo, getOverview, updateOverview} = useWorker()
+    const {socket} = useSocket()
 
-        })
-        const msg = Object.groupBy(ms, product => product.timestamp)
-        const qsg = Object.groupBy(qs, product => product.timestamp)
-        const tsg = Object.groupBy(ts, product => product.timestamp)
-        let msa = []
-        let qsa = []
-        let tsa = []
-        for (const key in msg) {
-            let tmp = {name: format(fromUnixTime(key), 'hh:MM:ss')}
-            msg[key].forEach(d => {
-                tmp[d.name] = d.value
-            })
-           msa.push(tmp)
-        }
-        for (const key in qsg) {
-            let tmp = {name: format(fromUnixTime(key), 'hh:MM:ss')}
-            qsg[key].forEach(d => {
-                tmp[d.name] = d.value
-            })
-           qsa.push(tmp)
-        }
-        for (const key in tsg) {
-            let tmp = {name: format(fromUnixTime(key), 'hh:MM:ss')}
-            tsg[key].forEach(d => {
-                tmp[d.name] = d.value
-            })
-           tsa.push(tmp)
-        }
-        setQueuedMessages(qsa)
-        setMessages(msa)
-        setTraffic(tsa)
-        setMetrics({server: mt})
-    }
-    const getOverview = () => {
-        HttpClient.get("/overview").then(response => {
-            if(response.data.hasOwnProperty('metrics')) {
-                updateMetrics(response.data)
-                setServerInfo(response.data.server_info)
-                setCounters(response.data.counters)
-                setTimeout(() => {
-                    getOverview()
-                }, 100)
-            }
-            if(response.data.hasOwnProperty('queues')) {
-                setQueues(response.data.queues.items)
-            }
-        })
-    }
     useEffect(() => {
         getOverview()
     }, []);
+    useEffect(() => {
+        if (socket) {
+            socket.on("overview:response", (data) => {
+                updateOverview(data)
+            })
+        }
+    }, [socket]);
     return (
         <div>
             <h1 className="text-3xl font-semibold">
@@ -215,7 +121,7 @@ export const Home = () => {
                     </div>
                 </div>
                 <div>
-                    <h1>Traffic Rate</h1>
+                    <h1>Traffic Rate (in Bytes/s)</h1>
                     <div className="h-80">
                         <StackedAreaChart series={traffic} options={{xaxis: {field: "name"}, fields: [{name: "traffic_in", color: "#00E396"}, {name: "traffic_out", color: "#F0E396"}]}}/>
                     </div>

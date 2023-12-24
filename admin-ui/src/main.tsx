@@ -4,9 +4,15 @@ import 'normalize.css';
 import '@unocss/reset/tailwind.css';
 import 'uno.css';
 import App from '@/App.tsx';
+import {SocketProvider} from "@/hooks/websocket";
+import {WorkerProvider} from "@/hooks/worker";
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <HashRouter>
-        <App/>
+        <WorkerProvider>
+            <SocketProvider>
+                <App/>
+            </SocketProvider>
+        </WorkerProvider>
     </HashRouter>
 );

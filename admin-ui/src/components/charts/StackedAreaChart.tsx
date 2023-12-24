@@ -12,7 +12,7 @@ export const StackedAreaChart = ({title, series, options}) => {
                 <Tooltip />
                 <Legend align="left" verticalAlign="top"/>
                 {options.fields.map((field, i) => {
-                    return <Area animationEasing="ease" key={i} stroke={field.color} fill={field.color} stackId="1" type="monotone" dataKey={field.name} />
+                    return <Area isAnimationActive={false} key={i} stroke={field.color} fill={field.color} stackId="1" type="monotone" dataKey={field.name} />
                 })}
             </ComposedChart>
         </ResponsiveContainer>
