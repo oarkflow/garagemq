@@ -95,10 +95,13 @@ export const Queues = ({data}) => {
             cell: (ctx: CellContext<any, any>) => {
                 const row = ctx.row.original
                 return (
-                    <NavLink className="text-blue-400 hover:text-blue-500 flex items-center gap-2" to={`/queues/${row.name}/consumers`}>
-                        <span>{row.consumers}</span>
-                        <FiEye className="w-3 h-3"/>
-                    </NavLink>
+                    <>
+                        {row.consumers > 0 && <NavLink className="text-blue-400 hover:text-blue-500 flex items-center gap-2" to={`/queues/${row.name}/consumers`}>
+                            <span>{row.consumers}</span>
+                            <FiEye className="w-3 h-3"/>
+                        </NavLink>}
+                        {row.consumers === 0 && <p>{row.consumers}</p>}
+                    </>
                 )
             },
         },

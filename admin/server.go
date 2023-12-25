@@ -41,6 +41,7 @@ func NewServer(amqpServer *server.Server, host string, port string) *Server {
 	})
 	srv.GET("/connections", connectionHandler.Index)
 	srv.GET("/channels", channelsHandler.Index)
+	srv.GET("/channels/:channel/consumers", channelsHandler.Consumers)
 	srv.GET("/consumers", consumerHandler.Index)
 	srv.POST("/consumer/start", consumerHandler.Resume)
 	srv.POST("/consumer/pause", consumerHandler.Pause)

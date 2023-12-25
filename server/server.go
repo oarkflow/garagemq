@@ -63,9 +63,8 @@ type Server struct {
 	status       ServerState
 	storage      *srvstorage.SrvStorage
 	metrics      *SrvMetricsState
-
-	wg       sync.WaitGroup
-	shutdown chan struct{}
+	wg           sync.WaitGroup
+	shutdown     chan struct{}
 }
 
 // NewServer returns new instance of AMQP Server

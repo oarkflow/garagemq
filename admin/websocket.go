@@ -21,11 +21,11 @@ func NewWebsocket() {
 	})
 	websocketServer = server
 	server.OnConnect(func(socket *sio.Socket) error {
-		log.Warn().Str("id", socket.ID()).Msg("Websocket Connected")
+		log.Info().Str("id", socket.ID()).Msg("Websocket Connected")
 		return nil
 	})
 	server.OnDisconnect(func(socket *sio.Socket) error {
-		log.Warn().Str("id", socket.ID()).Msg("Websocket Disconnected")
+		log.Info().Str("id", socket.ID()).Msg("Websocket Disconnected")
 		return nil
 	})
 	server.OnError(func(socket *sio.Socket, err error) {

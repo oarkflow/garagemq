@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/oarkflow/log"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -47,6 +48,15 @@ func init() {
 }
 
 func main() {
+	log.DefaultLogger = log.Logger{
+		TimeFormat: "15:04:05",
+		Caller:     1,
+		Writer: &log.ConsoleWriter{
+			ColorOutput:    true,
+			QuoteString:    true,
+			EndWithMessage: true,
+		},
+	}
 	deadlock.Opts.Disable = true
 	if viper.GetBool("help") {
 		flag.Usage()

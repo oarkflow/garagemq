@@ -1,8 +1,10 @@
 import {Table} from "@/components/table";
-import {ColumnDef} from "@tanstack/table-core";
+import {CellContext, ColumnDef} from "@tanstack/table-core";
 import {effect} from "@preact/signals";
 import {HttpClient} from "@/helpers/api";
 import {useEffect, useState} from "react";
+import {NavLink} from "react-router-dom";
+import {FiEye} from "react-icons/fi";
 
 export const Channels = () => {
     const [channels, setChannels] = useState([])
@@ -15,11 +17,11 @@ export const Channels = () => {
     };
     const columns: ColumnDef[] = [
         {
-            accessorKey: "ConnID",
+            accessorKey: "conn_id",
             header: "Connection ID",
         },
         {
-            accessorKey: "ChannelID",
+            accessorKey: "channel_id",
             header: "Channel ID",
         },
         {
@@ -71,6 +73,23 @@ export const Channels = () => {
             accessorFn: (row) => `${transformRate(row.counters.unacked)}`,
             header: "Unacked",
             accessorKey: "unacked",
+        },
+
+        {
+            header: "Consumers",
+            accessorKey: "consumers",
+            cell: (ctx: CellContext<any, any>) => {
+                const row = ctx.row.original
+                return (
+                    <>
+                        {row.consumers > 0 && <NavLink className="text-blue-400 hover:text-blue-500 flex items-center gap-2" to={`/channels/${row.channel_id}/consumers`}>
+                            <span>{row.consumers}</span>
+                            <FiEye className="w-3 h-3"/>
+                        </NavLink>}
+                        {row.consumers === 0 && <p>{row.consumers}</p>}
+                    </>
+                )
+            },
         },
     ];
     useEffect(() => {

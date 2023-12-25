@@ -9,6 +9,7 @@ import {Exchanges} from "@/views/exchanges";
 import {Queues} from "@/views/queues";
 import {Consumers} from "@/views/consumers";
 import {QueueConsumers} from "@/views/queues/Consumer";
+import {ChannelConsumers} from "@/views/channels/Consumer";
 
 // const Main = lazy(() => import('@/views/main/main'));
 // const NotFound = lazy(() => import('@/views/notfound/notfound'));
@@ -40,6 +41,10 @@ const routes: RouteObject[] = [
             {
                 path: '/queues/:queue/consumers',
                 element: <QueueConsumers/>
+            },
+            {
+                path: '/channels/:channel/consumers',
+                element: <ChannelConsumers/>
             },
             {
                 path: '/consumers',
