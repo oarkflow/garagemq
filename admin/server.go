@@ -31,7 +31,11 @@ func NewServer(amqpServer *server.Server, host string, port string) *Server {
 	connectionHandler := NewConnectionsHandler(amqpServer)
 	channelsHandler := NewChannelsHandler(amqpServer)
 
-	srv.Static("/", "admin-frontend/build")
+	srv.Static("/", "./admin-ui/dist", frame.StaticConfig{
+		IndexNames:         []string{"index.html"},
+		GenerateIndexPages: true,
+		Compress:           true,
+	})
 	srv.GET("/overview", overviewHandler.Index)
 	srv.GET("/exchanges", exchangeHandler.Index)
 	srv.GET("/queues", queuesHandler.Index)

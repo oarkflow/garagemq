@@ -724,3 +724,19 @@ func (channel *Channel) GetConsumersCount() int {
 func (channel *Channel) GetMetrics() *ChannelMetricsState {
 	return channel.metrics
 }
+
+func (channel *Channel) Status() string {
+	switch channel.status {
+	case channelNew:
+		return "new"
+	case channelOpen:
+		return "open"
+	case channelClosing:
+		return "closing"
+	case channelClosed:
+		return "closed"
+	case channelDelete:
+		return "delete"
+	}
+	return ""
+}

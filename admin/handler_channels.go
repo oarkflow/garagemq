@@ -24,6 +24,7 @@ type Channel struct {
 	ConnID    uint64                        `json:"conn_id"`
 	ChannelID uint16                        `json:"channel_id"`
 	Channel   string                        `json:"channel"`
+	Status    string                        `json:"status"`
 	Vhost     string                        `json:"vhost"`
 	User      string                        `json:"user"`
 	Qos       string                        `json:"qos"`
@@ -60,6 +61,7 @@ func channelResponse(amqpServer *server.Server) *ChannelsResponse {
 					Channel:   fmt.Sprintf("%s (%d)", conn.GetRemoteAddr().String(), chID),
 					Vhost:     conn.GetVirtualHost().GetName(),
 					User:      conn.GetUsername(),
+					Status:    ch.Status(),
 					Consumers: ch.GetConsumersCount(),
 					Qos:       fmt.Sprintf("%d / %d", ch.GetQos().PrefetchCount(), ch.GetQos().PrefetchSize()),
 					Counters: map[string]*metrics.TrackItem{

@@ -2,6 +2,7 @@ package admin
 
 import (
 	"context"
+	"runtime"
 	"time"
 
 	"github.com/oarkflow/frame"
@@ -47,6 +48,7 @@ func (h *OverviewHandler) Index(ctx context.Context, c *frame.Context) {
 	MyTicker := time.NewTicker(2 * time.Second)
 	go func(h *OverviewHandler) {
 		for {
+			runtime.GC()
 			<-MyTicker.C
 			resp := h.getOverview()
 			websocketServer.Broadcast("overview:response", resp)

@@ -51,7 +51,7 @@ export const Channels = () => {
         },
         {
             accessorFn: (row) => `${transformRate(row.counters.confirm)}`,
-            header: "Confirm",
+            header: "Confirm Count",
             accessorKey: "confirm_count",
         },
         {
@@ -90,6 +90,10 @@ export const Channels = () => {
                     </>
                 )
             },
+        },
+        {
+            accessorKey: "status",
+            header: "Status",
         },
     ];
     useEffect(() => {
