@@ -14,8 +14,15 @@ type OverviewHandler struct {
 	amqpServer *server.Server
 }
 
+type ServerInfo struct {
+	ID    uint64 `json:"id"`
+	Name  string `json:"name"`
+	URL   string `json:"url"`
+	Stats *Stats `json:"stats"`
+}
+
 type OverviewResponse struct {
-	ServerInfo  server.ServerInfo    `json:"server_info"`
+	ServerInfo  ServerInfo           `json:"server_info"`
 	Metrics     []*Metric            `json:"metrics"`
 	Counters    map[string]int       `json:"counters"`
 	Connections *ConnectionsResponse `json:"connections"`
@@ -49,9 +56,15 @@ func (h *OverviewHandler) Index(ctx context.Context, c *frame.Context) {
 }
 
 func (h *OverviewHandler) getOverview() *OverviewResponse {
+	info := h.amqpServer.GetInfo()
 	response := &OverviewResponse{
-		Counters:    make(map[string]int),
-		ServerInfo:  h.amqpServer.GetInfo(),
+		Counters: make(map[string]int),
+		ServerInfo: ServerInfo{
+			ID:    info.ID,
+			Name:  info.Name,
+			URL:   info.URL,
+			Stats: SystemInfo(),
+		},
 		Queues:      queueResponse(h.amqpServer),
 		Connections: connectionResponse(h.amqpServer),
 		Exchanges:   exchangeResponse(h.amqpServer),

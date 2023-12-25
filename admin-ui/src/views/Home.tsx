@@ -100,7 +100,11 @@ export const Home = () => {
     return (
         <div>
             <h1 className="text-3xl font-semibold">
-                {serverInfo?.name} <span className="font-normal text-base">@ {serverInfo?.url}</span>
+                <span>{serverInfo?.name} <span className="font-normal text-base">@ {serverInfo?.url}</span></span>
+                <span className="font-bold text-base pl-2">
+                    <span className="inline-block w-60">CPU Usage: <span className="text-gray-500" title="Total PID CPU Usage">{serverInfo?.stats.pid.cpu.toFixed(1)}%</span> / <span className="text-gray" title="Total OS CPU Usage">{serverInfo?.stats.os.cpu.toFixed(1)}%</span></span>
+                    <span className="pl-2">Memory Usage: <span className="text-gray-500" title="Total PID Memory Usage">{humanFileSize(serverInfo?.stats.pid.ram)}</span> / <span className="text-gray" title="Total OS Memory Usage">{humanFileSize(serverInfo?.stats.os.ram)}</span> / <span className="text-gray" title="Total Memory Available">{humanFileSize(serverInfo?.stats.os.total_ram)}</span></span>
+                </span>
             </h1>
             <div className="flex flex-wrap gap-5 pt-4">
                 <QueuedMessage metrics={metrics?.server} />
