@@ -8,6 +8,7 @@ export class Socket {
     public headerStartChar
     public dataStartCharCode = 2
     public dataStartChar
+    public callbackOnOpen
     public subProtocol = 'sac-sock'
     public ws: WebSocket
     public reconnected = false
@@ -114,7 +115,7 @@ export class Socket {
 
     public startReconnect() {
         let self = this
-        self.reconnectInterval = setInterval(function () {
+        self.reconnectInterval = setTimeout(function () {
             if (self.totalAttempts <= self.maxAttempts) {
                 try {
                     console.log("attempt to reconnect...")
@@ -131,10 +132,14 @@ export class Socket {
                         newWS.onopen = self.ws.onopen;
                     }
                     self.ws = newWS;
+                    if (self.callbackOnOpen) {
+                        self.callbackOnOpen(self)
+                    }
                     if (!self.reconnectOpts.replayOnConnect && self.connectedOnce) {
                         self.onConnect(self.noop);
                     }
                 } catch (err) {
+                    self.startReconnect()
                     console.log("Error on reconnection", err)
                 }
             } else {

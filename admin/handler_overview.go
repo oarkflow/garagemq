@@ -2,8 +2,6 @@ package admin
 
 import (
 	"context"
-	"runtime"
-	"time"
 
 	"github.com/oarkflow/frame"
 
@@ -44,17 +42,7 @@ func NewOverviewHandler(amqpServer *server.Server) *OverviewHandler {
 }
 
 func (h *OverviewHandler) Index(ctx context.Context, c *frame.Context) {
-	response := h.getOverview()
-	MyTicker := time.NewTicker(2 * time.Second)
-	go func(h *OverviewHandler) {
-		for {
-			runtime.GC()
-			<-MyTicker.C
-			resp := h.getOverview()
-			websocketServer.Broadcast("overview:response", resp)
-		}
-	}(h)
-	c.JSON(200, response)
+	c.JSON(200, h.getOverview())
 }
 
 func (h *OverviewHandler) getOverview() *OverviewResponse {

@@ -99,7 +99,7 @@ export const Channels = () => {
     useEffect(() => {
         HttpClient.get("/channels").then(response => {
             if(response.data.hasOwnProperty('items')) {
-                setChannels(response.data.items)
+                setChannels(response.data.items || [])
             }
         })
     }, [])

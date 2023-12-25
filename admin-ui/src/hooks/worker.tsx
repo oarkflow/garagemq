@@ -80,7 +80,7 @@ export const WorkerProvider = ({ children, defaultWorker }) => {
             })
             msa.push(tmp)
             } catch (e) {
-                console.log(e)
+                console.log(e, key)
             }
         }
         for (const key in qsg) {
@@ -91,7 +91,7 @@ export const WorkerProvider = ({ children, defaultWorker }) => {
             })
             qsa.push(tmp)
             } catch (e) {
-                console.log(e)
+                console.log(e, key)
             }
         }
         for (const key in tsg) {
@@ -102,7 +102,7 @@ export const WorkerProvider = ({ children, defaultWorker }) => {
             })
             tsa.push(tmp)
             } catch (e) {
-                console.log(e)
+                console.log(e, key)
             }
         }
         setQueuedMessages(qsa)

@@ -10,8 +10,8 @@ export const SocketProvider = ({ children, defaultSocket }) => {
 		socket,
 		setSocket,
 		createSocket: (url: string, userID: string, callback ?: any) => {
-			console.log(url)
 			const ws = new Socket(url, userID)
+            ws.callbackOnOpen = callback
 			return ws.connect().then(connected => {
                 if (callback) {
                     callback(ws)

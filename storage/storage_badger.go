@@ -17,6 +17,7 @@ type Badger struct {
 func NewBadger(storageDir string) *Badger {
 	storage := &Badger{}
 	opts := badger.DefaultOptions(storageDir)
+	opts.ZSTDCompressionLevel = 10
 	opts.SyncWrites = true
 	opts.Dir = storageDir
 	opts.ValueDir = storageDir

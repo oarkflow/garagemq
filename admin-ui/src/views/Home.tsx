@@ -90,13 +90,6 @@ export const Home = () => {
     useEffect(() => {
         getOverview()
     }, []);
-    useEffect(() => {
-        if (socket) {
-            socket.on("overview:response", (data) => {
-                updateOverview(data)
-            })
-        }
-    }, [socket]);
     return (
         <div>
             <h1 className="text-3xl font-semibold">

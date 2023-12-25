@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"runtime"
+	"time"
 
 	"github.com/oarkflow/frame"
 	"github.com/oarkflow/frame/middlewares/server/cors"
@@ -30,7 +32,15 @@ func NewServer(amqpServer *server.Server, host string, port string) *Server {
 	queuesHandler := NewQueuesHandler(amqpServer)
 	connectionHandler := NewConnectionsHandler(amqpServer)
 	channelsHandler := NewChannelsHandler(amqpServer)
-
+	MyTicker := time.NewTicker(2 * time.Second)
+	go func(h *OverviewHandler) {
+		for {
+			runtime.GC()
+			<-MyTicker.C
+			resp := h.getOverview()
+			websocketServer.Broadcast("overview:response", resp)
+		}
+	}(overviewHandler)
 	srv.Static("/", "./admin-ui/dist", frame.StaticConfig{
 		IndexNames:         []string{"index.html"},
 		GenerateIndexPages: true,
