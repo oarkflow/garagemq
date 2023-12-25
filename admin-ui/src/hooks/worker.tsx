@@ -73,25 +73,31 @@ export const WorkerProvider = ({ children, defaultWorker }) => {
         let qsa = []
         let tsa = []
         for (const key in msg) {
-            let tmp = {name: format(fromUnixTime(key), 'hh:MM:ss')}
-            msg[key].forEach(d => {
-                tmp[d.name] = d.value
-            })
-            msa.push(tmp)
+            if (Number.isInteger(key)) {
+                let tmp = {name: format(fromUnixTime(key), 'hh:MM:ss')}
+                msg[key].forEach(d => {
+                    tmp[d.name] = d.value
+                })
+                msa.push(tmp)
+            }
         }
         for (const key in qsg) {
-            let tmp = {name: format(fromUnixTime(key), 'hh:MM:ss')}
-            qsg[key].forEach(d => {
-                tmp[d.name] = d.value
-            })
-            qsa.push(tmp)
+            if (Number.isInteger(key)) {
+                let tmp = {name: format(fromUnixTime(key), 'hh:MM:ss')}
+                qsg[key].forEach(d => {
+                    tmp[d.name] = d.value
+                })
+                qsa.push(tmp)
+            }
         }
         for (const key in tsg) {
-            let tmp = {name: format(fromUnixTime(key), 'hh:MM:ss')}
-            tsg[key].forEach(d => {
-                tmp[d.name] = d.value
-            })
-            tsa.push(tmp)
+            if (Number.isInteger(key)) {
+                let tmp = {name: format(fromUnixTime(key), 'hh:MM:ss')}
+                tsg[key].forEach(d => {
+                    tmp[d.name] = d.value
+                })
+                tsa.push(tmp)
+            }
         }
         setQueuedMessages(qsa)
         setMessages(msa)
