@@ -384,7 +384,7 @@ func (srv *Server) getStorageInstance(name string, isPersistent bool) interfaces
 	case config.DbEngineTypeBuntDb:
 		return storage.NewBuntDB(stPath)
 	default:
-		srv.stopWithError(nil, fmt.Sprintf("Unknown db engine '%s'", srv.config.Db.Engine))
+		return storage.NewFlyDB(stPath)
 	}
 	return nil
 }

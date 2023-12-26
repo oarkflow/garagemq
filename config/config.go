@@ -8,6 +8,7 @@ import (
 
 const (
 	DbEngineTypeBadger string = "badger"
+	DbEngineTypeFlyDB  string = "flydb"
 	DbEngineTypeBuntDb string = "buntdb"
 
 	DbPathMemory string = ":memory:"

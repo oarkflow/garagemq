@@ -3,6 +3,7 @@ package config
 const (
 	dbBuntDB = "buntdb"
 	dbBadger = "badger"
+	dbFlyDB  = "flydb"
 )
 
 func defaultConfig() *Config {
@@ -26,12 +27,12 @@ func defaultConfig() *Config {
 			Port: "15672",
 		},
 		Queue: Queue{
-			ShardSize:        8 << 10, // 8k
+			ShardSize:        8 << 10,      // 8k
 			MaxMessagesInRAM: 10 * 8 << 10, // 10 buckets
 		},
 		Db: Db{
 			DefaultPath: "db",
-			Engine:      dbBadger,
+			Engine:      dbFlyDB,
 		},
 		Vhost: Vhost{
 			DefaultPath: "/",
