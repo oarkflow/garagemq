@@ -32,7 +32,7 @@ func defaultConfig() *Config {
 		},
 		Db: Db{
 			DefaultPath: "db",
-			Engine:      dbFlyDB,
+			Engine:      dbBadger,
 		},
 		Vhost: Vhost{
 			DefaultPath: "/",
