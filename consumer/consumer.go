@@ -60,6 +60,7 @@ func generateTag(id uint64) string {
 func (consumer *Consumer) Start() {
 	consumer.status = started
 	consumer.consume = make(chan struct{}, 1)
+	consumer.queue.AddConsumer(consumer, consumer.queue.IsExclusive())
 	go consumer.startConsume()
 	consumer.Consume()
 }
@@ -169,13 +170,13 @@ func (consumer *Consumer) Stop() {
 	}
 	consumer.status = stopped
 	consumer.statusLock.Unlock()
+	consumer.queue.RemoveConsumer(consumer.ConsumerTag)
 	close(consumer.consume)
 }
 
 // Cancel stops consumer and send basic.cancel method to the client
 func (consumer *Consumer) Cancel() {
 	consumer.Stop()
-	consumer.queue.RemoveConsumer(consumer.ConsumerTag)
 	consumer.channel.SendMethod(&amqp.BasicCancel{ConsumerTag: consumer.ConsumerTag, NoWait: true})
 }
 
