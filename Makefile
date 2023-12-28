@@ -2,10 +2,10 @@ amqp.gen:
 	go run protocol/*.go && go fmt amqp/*_generated.go
 
 deps:
-	dep ensure && cd admin-frontend && yarn install
+	dep ensure && cd admin-ui && pnpm install
 
 build.all: deps
-	go build -o bin/garagemq main.go && cd admin-frontend && yarn build
+	go build -o bin/garagemq main.go && cd admin-frontend && pnpm build
 
 build:
 	env GO111MODULE=on go build -o bin/garagemq main.go
