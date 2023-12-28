@@ -1,3 +1,5 @@
+DOCKER_CONTAINER_LIST := $(shell docker ps --format '{{.Names}}')
+
 amqp.gen:
 	go run protocol/*.go && go fmt amqp/*_generated.go
 
@@ -9,6 +11,17 @@ build.all: deps
 
 build:
 	env GO111MODULE=on go build -o bin/garagemq main.go
+
+build-image:
+	docker build --tag oarkflow/garagemq .
+
+docker-stop:
+	docker container stop oarkflow_garagemq &&  docker rm oarkflow_garagemq
+
+docker-run:
+	docker run --name=oarkflow_garagemq -itd -p 5674:5672 -p 15672:15672 oarkflow/garagemq
+
+build-docker: build-image docker-run
 
 run: build
 	bin/garagemq
