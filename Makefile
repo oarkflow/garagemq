@@ -19,7 +19,7 @@ docker-stop:
 	docker container stop oarkflow_garagemq &&  docker rm oarkflow_garagemq
 
 docker-run:
-	docker run --name=oarkflow_garagemq -itd -p 5674:5672 -p 15672:15672 oarkflow/garagemq
+	docker run --name=oarkflow_garagemq -itd -p 5672:5672 -p 15672:15672 oarkflow/garagemq
 
 build-docker: build-image docker-run
 
